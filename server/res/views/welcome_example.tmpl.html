@@ -1,0 +1,19 @@
+{{ define "welcome_example" }}
+<p>Godoogle is a <a HREF="https://go.dev/" target="_blank">Go</a> API search engine, which (by now) allows you to search
+    by <strong>function type signature</strong>, including <a
+            href="https://go.dev/doc/tutorial/generics"><strong>generic</strong></a> functions.</p>
+
+<h2>Example Searches:</h2>
+<ul>
+    <li><a href="/search?q=func ([]string, string) string"><code>func ([]string, string) string</code></a></li>
+    <li><a href="/search?q=func(elems []string, sep string) string"><code>func(elems []string, sep string) string</code></a>
+    </li>
+    <li><a href="/search?q=[T any] func(bool, T, T) T"><code>[T any] func(bool, T, T) T</code></a></li>
+    <li><a href="/search?q=[T any] func(bool, func() T, func() T) T"><code>[T any] func(bool, func() T, func() T)
+        T</code></a></li>
+    <li><a href="/search?q=[a,b any] func([]a, func(a, int) b) []b"><code>[a,b any] func([]a, func(a, int) b) []b</code></a>
+    </li>
+    <li><a href="/search?q=[T any] func(a []T, size int) [][]T"><code>[T any] func(a []T, size int) [][]T</code></a>
+    </li>
+</ul>
+{{ end }}

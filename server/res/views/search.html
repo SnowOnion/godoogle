@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Godoogle</title>
+</head>
+<body>
+<!--<h1>Godoogle</h1>-->
+<h1>Welcome to <a href="/">Godoogle</a></h1>
+
+<form action="/search" method="get">
+    <input type="text" name="q" value="{{.q}}">
+    <input type="submit" value="Search">
+</form>
+
+<!--<h2>Welcome to Godoogle</h2>-->
+
+{{ if .error }}
+<p>{{.error}}</p>
+<hr>
+{{ template "welcome_example" . }}
+
+{{ else if .result}}
+<ol>
+    {{ range .result }}
+
+    <li>
+        <a href="{{.URL}}" target="_blank"><code>{{.FullName}}</code></a><code> ::
+        {{.Signature}}</code>
+    </li>
+    {{ end }}
+</ol>
+{{ else }}
+{{ template "welcome_example" . }}
+{{ end }}
+
+
+<hr>
+<footer>
+    <p>Godoogle v0.0.1 2024-03-17 | Dev plan: smarter, wider (cover pkg.go.dev? & private deploy), faster.</p>
+    <p>Godoogle means “<a href="https://hoogle.haskell.org/" target="_blank">Hoogle</a> for Go”.</p>
+</footer>
+
+</body>
+</html>
