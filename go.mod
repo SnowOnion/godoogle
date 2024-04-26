@@ -4,6 +4,7 @@ go 1.21.4
 
 require (
 	github.com/cloudwego/hertz v0.8.1
+	github.com/dominikbraun/graph v0.23.0
 	github.com/hertz-contrib/logger/logrus v1.0.1
 	github.com/hertz-contrib/requestid v1.1.0
 	github.com/samber/lo v1.39.0
@@ -12,6 +13,8 @@ require (
 	golang.org/x/tools v0.19.0
 )
 
+//require github.com/SnowOnion/graph v0.0.0-20240425072614-7ee17c8c577e
+
 require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220413063733-65bf48ffb3a7 // indirect
@@ -19,11 +22,14 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cloudwego/netpoll v0.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/felixge/fgprof v0.9.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
+	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/henrylee2cn/ameda v1.4.10 // indirect
 	github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 // indirect
+	github.com/hertz-contrib/pprof v0.1.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/nyaruka/phonenumbers v1.0.55 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

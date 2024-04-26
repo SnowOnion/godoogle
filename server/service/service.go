@@ -3,11 +3,14 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/SnowOnion/godoogle/collect"
-	"github.com/SnowOnion/godoogle/server/model"
-	"github.com/SnowOnion/godoogle/u"
+
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/samber/lo"
+
+	"github.com/SnowOnion/godoogle/collect"
+	"github.com/SnowOnion/godoogle/ranking"
+	"github.com/SnowOnion/godoogle/server/model"
+	"github.com/SnowOnion/godoogle/u"
 )
 
 func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) {
@@ -19,7 +22,7 @@ func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) 
 		return model.SearchResp{}, fmt.Errorf("error parsing query")
 	}
 
-	result := lo.Map(collect.NaiveRanker.Rank(inpSig, collect.FuncDatabase),
+	result := lo.Map(ranking.DefaultRanker.Rank(inpSig, collect.FuncDatabase),
 		func(sigDecl u.T2, ind int) model.ResultItem {
 			name := sigDecl.B.Name()
 			pkg := sigDecl.B.Pkg().Path()

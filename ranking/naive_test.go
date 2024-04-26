@@ -2,11 +2,13 @@ package ranking
 
 import (
 	"fmt"
-	"github.com/SnowOnion/godoogle/collect"
-	"github.com/SnowOnion/godoogle/u"
-	"github.com/samber/lo"
 	"go/types"
 	"testing"
+
+	"github.com/samber/lo"
+
+	"github.com/SnowOnion/godoogle/collect"
+	"github.com/SnowOnion/godoogle/u"
 )
 
 type a func(int, int) int
@@ -72,7 +74,7 @@ func TestNaive2(t *testing.T) {
 		t.Error(err)
 	}
 
-	inps := []string{
+	suite := []lo.Tuple2[string, string]{
 		//`func (int,int) int`,
 		//`func (int,int) bool`,
 		//`[T comparable] func (T,T) bool`,
@@ -82,7 +84,8 @@ func TestNaive2(t *testing.T) {
 		//`[E constraints.Ordered] func(x []E)`,
 		//`[E constraints.Ordered] func([]E)`,
 		//`[E constraints.Ordered] func([]E) []E`,
-		`[a, b any] func (collection []a, iteratee func(item a, index int) b) []b`, // lo.Map
+		lo.T2(`[a, b any] func (collection []a, iteratee func(item a, index int) b) []b`, `github.com/samber/lo.Map`),
+		lo.T2(`[b ,a any] func (collection []a, iteratee func(item a, index int) b) []b`, `github.com/samber/lo.Map`), // TODO
 		//`[T, R any] func (collection []T, iteratee func(item T, index int) R) []R`,
 		//`[T, R any, K comparable] func (collection []T, iteratee func(item T, index int) R) []R`,
 	}
@@ -95,16 +98,22 @@ func TestNaive2(t *testing.T) {
 	//	fmt.Println(ind, sigDecl)
 	//}
 
-	for _, inp := range inps {
-		inpSig := lo.T2(collect.Dummy(inp)).A
+	for _, inOut := range suite {
+		inpSig := lo.T2(collect.Dummy(inOut.A)).A
 		//fmt.Println(types.IdenticalIgnoreTags(q.A, q.A), q)
 		fmt.Println("~~~Search result of", inpSig)
 		//fmt.Println(ranker.Rank(inpSig, sigs))
 
-		for ind, sigDecl := range ranker.Rank(inpSig, sigs) {
-			fmt.Printf("%4d %s#%s\n", ind, sigDecl.B.Name(), sigDecl)
+		result := ranker.Rank(inpSig, sigs)
+		for ind, sigDecl := range result[:min(10, len(result))] {
+			fmt.Printf("%4d %s - %s\n", ind, sigDecl.B.Name(), sigDecl)
 		}
 		fmt.Println("~~~~~~~~~~~~")
+		if inOut.B != "" {
+			if result[0].B.FullName() != inOut.B {
+				t.Errorf("Top 1 is %s; expected %s", result[0].B.FullName(), inOut.B)
+			}
+		}
 
 		//fmt.Println("Rank~~~~", inpSig)
 		//fmt.Println("Candi~~~", sigs[152].A)

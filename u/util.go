@@ -1,8 +1,9 @@
 package u
 
 import (
-	"github.com/samber/lo"
 	"go/types"
+
+	"github.com/samber/lo"
 )
 
 type T2 lo.Tuple2[*types.Signature, *types.Func]
@@ -11,7 +12,7 @@ type T2 lo.Tuple2[*types.Signature, *types.Func]
 
 // for better debugging
 func (t T2) String() string {
-	return t.B.FullName() + ": " + t.A.String()
+	return t.B.FullName() + " :: " + t.A.String()
 }
 
 // KsVs returns []K, []V in corresponding order.

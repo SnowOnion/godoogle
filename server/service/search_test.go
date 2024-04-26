@@ -2,14 +2,19 @@ package service
 
 import (
 	"context"
-	"github.com/SnowOnion/godoogle/collect"
-	"github.com/SnowOnion/godoogle/server/model"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/SnowOnion/godoogle/collect"
+	"github.com/SnowOnion/godoogle/ranking"
+	"github.com/SnowOnion/godoogle/server/model"
 )
 
+// TODO wip!
 func TestSearch(t *testing.T) {
 	collect.InitFuncDatabase()
+	ranking.DefaultRanker = ranking.NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
 
 	//q := `[a,b any] func([]a, func(a, int) b) []b`
 	//q := `func(sort.Interface)`
@@ -18,8 +23,11 @@ func TestSearch(t *testing.T) {
 	//q := `[T any] func(bool, func() T, func() T) T`
 
 	qs := []string{
+		`func (string) int`,
 		`[T any] func (f func() T) <-chan T`,
 		`[T any] func(collection []T, size int) [][]T`,
+		`[a, b any] func (collection []a, iteratee func(item a, index int) b) []b`,
+		`[b, a any] func (collection []a, iteratee func(item a, index int) b) []b`, // TODO
 	}
 	ctx := context.Background()
 	for _, q := range qs {

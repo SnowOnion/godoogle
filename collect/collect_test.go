@@ -2,10 +2,11 @@ package collect
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"go/token"
 	"go/types"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test1(t *testing.T) {
