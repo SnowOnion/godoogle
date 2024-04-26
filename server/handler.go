@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/SnowOnion/godoogle/server/model"
-	"github.com/SnowOnion/godoogle/server/service"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/samber/lo"
+
+	"github.com/SnowOnion/godoogle/server/model"
+	"github.com/SnowOnion/godoogle/server/service"
 )
 
 func Home(ctx context.Context, c *app.RequestContext) {
@@ -37,7 +39,7 @@ func SearchH(ctx context.Context, c *app.RequestContext) {
 		c.HTML(consts.StatusInternalServerError, "search.html",
 			map[string]any{
 				"q":     req.Query,
-				"error": "Sorry, something wrong with server. It's not your fault.",
+				"error": "Sorry, something is wrong with server. It’s not your fault.",
 			})
 		return
 	}
