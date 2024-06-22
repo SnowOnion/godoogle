@@ -48,7 +48,8 @@ func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
 		}
 		r.sigIndex[sigStr] = []u.T2{t}
 
-		r.InitDFS(Anonymize(t.A), 1)
+		// TODO 暴露配置项
+		r.InitDFS(Anonymize(t.A), 3)
 	}
 	o, _ := r.sigGraph.Order()
 	s, _ := r.sigGraph.Size()
@@ -83,7 +84,7 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 	}
 	for _, mut := range weakenResults(sig) {
 		r.InitDFS(mut, depthTTL-1)
-		_ = addEdge(r.sigGraph, r.hash(mut), r.hash(sig), 2)
+		_ = addEdge(r.sigGraph, r.hash(sig), r.hash(mut), 2)
 	}
 }
 
@@ -158,6 +159,10 @@ func weakenResults(sig *types.Signature) []*types.Signature {
 
 func addEdge[K comparable, T any](g graph.Graph[K, T], src, tar K, weight int) error {
 	return g.AddEdge(src, tar, graph.EdgeWeight(weight), graph.EdgeAttribute("label", strconv.Itoa(weight)))
+}
+
+func addRevE[K comparable, T any](g graph.Graph[K, T], tar, src K, weight int) error {
+	return addEdge(g, src, tar, weight)
 }
 
 // if src==tar, 0;

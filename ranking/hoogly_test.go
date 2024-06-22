@@ -110,37 +110,40 @@ func TestTryDominikbraunGraph(t *testing.T) {
 	}
 
 	// 为啥 AddEdge 不接受 T 而是 K，要我自己调用 hash 啊，乌鱼子 // TODO PR func AddEdgeT
-	_ = addEdge(g2, hash(sie), hash(sei), 1)
-	_ = addEdge(g2, hash(sei), hash(sie), 1)
-	_ = addEdge(g2, hash(vie), hash(sie), 2)
-	_ = addEdge(g2, hash(vie), hash(vei), 1)
-	_ = addEdge(g2, hash(vei), hash(sei), 2)
-	_ = addEdge(g2, hash(vei), hash(vie), 1)
-	_ = addEdge(g2, hash(si), hash(sie), 2)
-	_ = addEdge(g2, hash(si), hash(sei), 2)
-	_ = addEdge(g2, hash(se), hash(sie), 2)
-	_ = addEdge(g2, hash(se), hash(sei), 2)
-	_ = addEdge(g2, hash(vi), hash(vie), 2)
-	_ = addEdge(g2, hash(vi), hash(vei), 2)
-	_ = addEdge(g2, hash(vi), hash(si), 2)
-	_ = addEdge(g2, hash(ve), hash(vie), 2)
-	_ = addEdge(g2, hash(ve), hash(vei), 2)
-	_ = addEdge(g2, hash(ve), hash(se), 2)
-	_ = addEdge(g2, hash(sv), hash(si), 2)
-	_ = addEdge(g2, hash(sv), hash(se), 2)
-	_ = addEdge(g2, hash(vv), hash(vi), 2)
-	_ = addEdge(g2, hash(vv), hash(ve), 2)
-	_ = addEdge(g2, hash(vv), hash(sv), 2)
+	// 大致是 BFS 地添加…… 但有的边是反的
+	// TODO 哎，Go 可以 in-place 修改。那么参数可以既是输入又是输出。……
+	_ = addEdge(g2, hash(sie), hash(sei), 1) // (PR)
+	_ = addEdge(g2, hash(sie), hash(vie), 2) // (WP)
+	_ = addRevE(g2, hash(sie), hash(se), 2)  // (WR)
+	_ = addRevE(g2, hash(sie), hash(si), 2)  // (WR)
+	_ = addEdge(g2, hash(sei), hash(sie), 1) // (PR)
+	_ = addEdge(g2, hash(sei), hash(vei), 2) // (WP)
+	_ = addRevE(g2, hash(sei), hash(si), 2)  // (WR)
+	_ = addRevE(g2, hash(sei), hash(se), 2)  // (WR)
+	_ = addEdge(g2, hash(vie), hash(vei), 1) // (PR)
+	_ = addRevE(g2, hash(vie), hash(ve), 2)  // (WR)
+	_ = addRevE(g2, hash(vie), hash(vi), 2)  // (WR)
+	_ = addEdge(g2, hash(se), hash(ve), 2)   // (WP)
+	_ = addRevE(g2, hash(se), hash(sv), 2)   // (WR)
+	_ = addEdge(g2, hash(si), hash(vi), 2)   // (WP)
+	_ = addRevE(g2, hash(si), hash(sv), 2)   // (WR)
+	_ = addEdge(g2, hash(vei), hash(vie), 1) // (PR)
+	_ = addRevE(g2, hash(vei), hash(vi), 2)  // (WR)
+	_ = addRevE(g2, hash(vei), hash(ve), 2)  // (WR)
+	_ = addRevE(g2, hash(vi), hash(vv), 2)   // (WR)
+	_ = addRevE(g2, hash(ve), hash(vv), 2)   // (WR)
+	_ = addEdge(g2, hash(sv), hash(vv), 2)   // (WP)
 
 	file2, _ := os.Create("./siggraph.gv")
-	_ = draw.DOT(g2, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
+	_ = draw.DOT(g2, file2)
+	t.Log("dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox")
 
+	// why not returning the sum(weight) together with the path? TODO
 	path, err := graph.ShortestPath(g2, hash(vv), hash(sie))
 	//path, err := graph.ShortestPath(g2, hash(sie), hash(vv))
-	// sum(weight) of shortestPath
 
 	t.Log(err, dist(g2, hash(vv), hash(sie)), path)
-	assert.Equal(t, 6, dist(g2, hash(vv), hash(sie)))
+	assert.Equal(t, 4, dist(g2, hash(sv), hash(sie)))
 	assert.Equal(t, 0, dist(g2, hash(vv), hash(vv)))
 	assert.Equal(t, math.MaxInt, dist(g2, hash(sie), hash(vv)))
 	assert.Equal(t, 1, dist(g2, hash(sei), hash(sie)))
@@ -189,7 +192,7 @@ func TestNewHooglyRanker(t *testing.T) {
 	sie := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i, e), false)
 
 	candi := []u.T2{
-		{sie, nil},
+		{sie, types.NewFunc(token.NoPos, nil, "", sie)},
 	}
 	r := NewHooglyRanker(candi)
 	t.Log(r.sigGraph.Order())
