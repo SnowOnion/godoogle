@@ -34,7 +34,7 @@ func TestSearch(t *testing.T) {
 		resp, err := Search(ctx, model.SearchReq{Query: q})
 		assert.Nil(t, err)
 		t.Log(len(resp.Result))
-		for _, r := range resp.Result[:5] {
+		for _, r := range resp.Result[:50] {
 			t.Log(r)
 		}
 	}

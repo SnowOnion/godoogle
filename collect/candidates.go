@@ -24,14 +24,15 @@ func InitFuncDatabase() {
 	pkgIDs := []string{
 		//`golang.org/x/exp/slices`,
 		//`github.com/samber/lo`,
-		//`std`,
+		`std`,
+		//`github.com/dominikbraun/graph`,
 
 		//`sort`,
 		// when siggraph has no depth limit: |V|=60509; |E|=351739
 		// depthTTL=2: |V|=7950; |E|=13607
 		// depthTTL=1: |V|=4465; |E|=4187
 
-		`strconv`,
+		//`strconv`,
 	}
 	FuncDatabase, err = ParseFuncSigsFromPackage(pkgIDs...)
 	if err != nil {

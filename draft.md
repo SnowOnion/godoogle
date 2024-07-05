@@ -20,8 +20,10 @@ func MustAtoi(s string) int {
 	(x1,x2) -> (y1,y2) <~~> (x2,x1) -> (y1,y2) // permute params (PP)
 	(x1,x2) -> (y1,y2) <~~> (x1,x2) -> (y2,y1) // permute results (PR)
 2. 
-	(x1,x2) -> (y1,y2) <~~ x2 -> (y1,y2) // weaken params (WP)
 	(x1,x2) -> (y1,y2) ~~> (x1,x2) -> y2 // weaken results (WR)
+3.  // Motivation: query `func(string)int` => get too many `func() int` before the expected `strconv.Atoi :: func(string) (int, error)`  
+    (x1,x2) -> (y1,y2) <~~ x2 -> (y1,y2) // weaken params (WP)
+    
 ```
 
 ```
@@ -43,4 +45,11 @@ func MustAtoi(s string) int {
     - `func([]string) []int` ~~> `func[a,b any]([]a, func(a) b) []b` + `func(string) int`
 
 ...
+```
+ 
+## Benchmark
+
+```shell
+cd ranking
+go test -v . -test.bench ^BenchmarkDistance -test.run ^BenchmarkDistance -benchtime=200x -benchmem
 ```

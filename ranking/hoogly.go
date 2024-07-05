@@ -40,9 +40,9 @@ func NewHooglyRanker(candidates []u.T2) HooglyRanker {
 }
 
 func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
-	for i, t := range candidates {
-		hlog.Debug(i, " ", t.String())
-		sigStr := t.A.String()
+	for _, t := range candidates {
+		//hlog.Debug(i, " ", t.String())
+		sigStr := t.A.String() // todo anonymize?
 		_, ok := r.sigIndex[sigStr]
 		if ok {
 			r.sigIndex[sigStr] = append(r.sigIndex[sigStr], t)
@@ -82,7 +82,7 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 	//}
 	for _, mut := range weakenParams(sig) {
 		r.InitDFS(mut, depthTTL-1)
-		_ = addEdge(r.sigGraph, r.hash(sig), r.hash(mut), 2)
+		_ = addEdge(r.sigGraph, r.hash(sig), r.hash(mut), 3)
 	}
 	for _, mut := range weakenResults(sig) {
 		r.InitDFS(mut, depthTTL-1)
@@ -113,6 +113,15 @@ func anonymizeVar(v *types.Var) *types.Var {
 
 func (r *HooglyRanker) Distance(src, tar *types.Signature) int {
 	return dist(r.sigGraph, r.hash(src), r.hash(tar))
+}
+
+func (r *HooglyRanker) DistanceWithCache(src, tar *types.Signature) int {
+	key := lo.T2(r.hash(src), r.hash(tar))
+	if d, ok := r.distCache[key]; ok {
+		return d
+	}
+	r.distCache[key] = dist(r.sigGraph, r.hash(src), r.hash(tar))
+	return r.distCache[key]
 }
 
 //func permuteParams(sig *types.Signature) []*types.Signature {
@@ -212,7 +221,7 @@ func (r HooglyRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 	//}
 
 	less := func(i, j int) bool {
-		return r.Distance(query, result[i].A) < r.Distance(query, result[j].A)
+		return r.DistanceWithCache(query, result[i].A) < r.DistanceWithCache(query, result[j].A)
 	}
 	sort.Slice(result, less)
 	return result

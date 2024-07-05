@@ -113,26 +113,26 @@ func TestTryDominikbraunGraph(t *testing.T) {
 	// 大致是 BFS 地添加…… 但有的边是反的
 	// TODO 哎，Go 可以 in-place 修改。那么参数可以既是输入又是输出。……
 	_ = addEdge(g2, hash(sie), hash(sei), 1) // (PR)
-	_ = addEdge(g2, hash(sie), hash(vie), 2) // (WP)
+	_ = addEdge(g2, hash(sie), hash(vie), 3) // (WP)
 	_ = addRevE(g2, hash(sie), hash(se), 2)  // (WR)
 	_ = addRevE(g2, hash(sie), hash(si), 2)  // (WR)
 	_ = addEdge(g2, hash(sei), hash(sie), 1) // (PR)
-	_ = addEdge(g2, hash(sei), hash(vei), 2) // (WP)
+	_ = addEdge(g2, hash(sei), hash(vei), 3) // (WP)
 	_ = addRevE(g2, hash(sei), hash(si), 2)  // (WR)
 	_ = addRevE(g2, hash(sei), hash(se), 2)  // (WR)
 	_ = addEdge(g2, hash(vie), hash(vei), 1) // (PR)
 	_ = addRevE(g2, hash(vie), hash(ve), 2)  // (WR)
 	_ = addRevE(g2, hash(vie), hash(vi), 2)  // (WR)
-	_ = addEdge(g2, hash(se), hash(ve), 2)   // (WP)
+	_ = addEdge(g2, hash(se), hash(ve), 3)   // (WP)
 	_ = addRevE(g2, hash(se), hash(sv), 2)   // (WR)
-	_ = addEdge(g2, hash(si), hash(vi), 2)   // (WP)
+	_ = addEdge(g2, hash(si), hash(vi), 3)   // (WP)
 	_ = addRevE(g2, hash(si), hash(sv), 2)   // (WR)
 	_ = addEdge(g2, hash(vei), hash(vie), 1) // (PR)
 	_ = addRevE(g2, hash(vei), hash(vi), 2)  // (WR)
 	_ = addRevE(g2, hash(vei), hash(ve), 2)  // (WR)
 	_ = addRevE(g2, hash(vi), hash(vv), 2)   // (WR)
 	_ = addRevE(g2, hash(ve), hash(vv), 2)   // (WR)
-	_ = addEdge(g2, hash(sv), hash(vv), 2)   // (WP)
+	_ = addEdge(g2, hash(sv), hash(vv), 3)   // (WP)
 
 	file2, _ := os.Create("./siggraph.gv")
 	_ = draw.DOT(g2, file2)
@@ -199,4 +199,38 @@ func TestNewHooglyRanker(t *testing.T) {
 	t.Log(r.sigGraph.Size())
 	file2, _ := os.Create("./siggraph.gv")
 	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
+}
+
+func BenchmarkDistance(b *testing.B) {
+	collect.InitFuncDatabase()
+	ranker := NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+
+	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
+	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
+	e := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("error").Type())
+
+	sie := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i, e), false)
+	si := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i), false)
+
+	for i := 0; i < b.N; i++ {
+		ranker.Distance(si, sie)
+		//b.Log()
+	}
+}
+
+func BenchmarkDistanceWithCache(b *testing.B) {
+	collect.InitFuncDatabase()
+	ranker := NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+
+	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
+	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
+	e := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("error").Type())
+
+	sie := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i, e), false)
+	si := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i), false)
+
+	for i := 0; i < b.N; i++ {
+		ranker.DistanceWithCache(si, sie)
+		//b.Log()
+	}
 }
