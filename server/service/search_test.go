@@ -24,10 +24,10 @@ func TestSearch(t *testing.T) {
 
 	qs := []string{
 		`func (string) int`,
-		`[T any] func (f func() T) <-chan T`,
-		`[T any] func(collection []T, size int) [][]T`,
-		`[a, b any] func (collection []a, iteratee func(item a, index int) b) []b`,
-		`[b, a any] func (collection []a, iteratee func(item a, index int) b) []b`, // TODO
+		//`[T any] func (f func() T) <-chan T`,
+		//`[T any] func(collection []T, size int) [][]T`,
+		//`[a, b any] func (collection []a, iteratee func(item a, index int) b) []b`,
+		//`[b, a any] func (collection []a, iteratee func(item a, index int) b) []b`, // TODO
 	}
 	ctx := context.Background()
 	for _, q := range qs {

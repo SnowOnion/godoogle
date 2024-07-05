@@ -23,4 +23,5 @@ type ResultItem struct {
 	Pkg       string `json:"pkg"`
 	URL       string `json:"url"`
 	Signature string `json:"signature"`
+	//Distance  int    `json:"distance"` // from query to this result // u.T2 扩展性不如 struct，不太好传出来…… TODO
 }

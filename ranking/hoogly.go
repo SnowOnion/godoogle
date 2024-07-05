@@ -25,7 +25,9 @@ type HooglyRanker struct {
 type SigStr = string // types.Signature#String()
 
 func NewHooglyRanker(candidates []u.T2) HooglyRanker {
-	hash := func(sig *types.Signature) string { return sig.String() }
+	hash := func(sig *types.Signature) string {
+		return sig.String()
+	}
 	r := HooglyRanker{
 		sigIndex:  make(map[SigStr][]u.T2),
 		hash:      hash,
@@ -80,11 +82,11 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 	//}
 	for _, mut := range weakenParams(sig) {
 		r.InitDFS(mut, depthTTL-1)
-		_ = addEdge(r.sigGraph, r.hash(mut), r.hash(sig), 2)
+		_ = addEdge(r.sigGraph, r.hash(sig), r.hash(mut), 2)
 	}
 	for _, mut := range weakenResults(sig) {
 		r.InitDFS(mut, depthTTL-1)
-		_ = addEdge(r.sigGraph, r.hash(sig), r.hash(mut), 2)
+		_ = addEdge(r.sigGraph, r.hash(mut), r.hash(sig), 2)
 	}
 }
 
@@ -197,9 +199,18 @@ func (r HooglyRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 
 	result := make([]u.T2, len(candidates))
 	copy(result, candidates)
+	for i := 0; i < len(result); i++ {
+		result[i].A = Anonymize(result[i].A)
+	}
 	//less := func(i, j int) bool {
 	//	return distance(query, result[i].A) < distance(query, result[j].A)
 	//}
+
+	//// debug
+	//for i, candidate := range result {
+	//	hlog.Debugf("Distance!%d %d %s", i, r.Distance(query, candidate.A), candidate.A)
+	//}
+
 	less := func(i, j int) bool {
 		return r.Distance(query, result[i].A) < r.Distance(query, result[j].A)
 	}

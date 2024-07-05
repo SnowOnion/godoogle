@@ -12,7 +12,6 @@ import (
 	"github.com/samber/lo"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/SnowOnion/godoogle/ranking"
 	"github.com/SnowOnion/godoogle/u"
 )
 
@@ -23,14 +22,16 @@ var (
 func InitFuncDatabase() {
 	var err error
 	pkgIDs := []string{
-		`golang.org/x/exp/slices`,
-		`github.com/samber/lo`,
-		`std`, //`sort`,
+		//`golang.org/x/exp/slices`,
+		//`github.com/samber/lo`,
+		//`std`,
+
+		//`sort`,
 		// when siggraph has no depth limit: |V|=60509; |E|=351739
 		// depthTTL=2: |V|=7950; |E|=13607
 		// depthTTL=1: |V|=4465; |E|=4187
 
-		//`strconv`,
+		`strconv`,
 	}
 	FuncDatabase, err = ParseFuncSigsFromPackage(pkgIDs...)
 	if err != nil {
@@ -227,7 +228,7 @@ func ParseFuncSigsFromPackage(patterns ...string) (sigs []u.T2, err error) {
 				// TODO not-exported receiver may have exported method, but seems not in pkg.go.dev ……
 				// p -> q == !p || q
 				if recv := sig.Recv(); fnObj.Exported() && (recv == nil || recv.Exported()) {
-					sig = ranking.Anonymize(sig) // TODO !!! be elegant
+					//sig = ranking.Anonymize(sig) // TODO !!! be elegant // 循环依赖
 					sigs = append(sigs, u.T2(lo.T2(sig, fnObj)))
 				}
 

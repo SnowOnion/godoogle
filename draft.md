@@ -3,6 +3,16 @@
 # Heuristics
 (Mixing Go and Haskell notations...)
 
+从类型 f 指向类型 g，则用 g 的实例可以实现 f 的实例。（考虑 柯里-霍华德对应。）
+例：
+// func(string) (int, error) -> func(string) int
+// 一种实现方式：
+func Atoi(s string) (int, error);
+func MustAtoi(s string) int {
+    i, _ := Atoi(s)
+    return i
+}
+
 ## Distances:
 0.
 	a -> b <~~> a -> b // identical (ID)
@@ -10,7 +20,7 @@
 	(x1,x2) -> (y1,y2) <~~> (x2,x1) -> (y1,y2) // permute params (PP)
 	(x1,x2) -> (y1,y2) <~~> (x1,x2) -> (y2,y1) // permute results (PR)
 2. 
-	(x1,x2) -> (y1,y2) ~~> x2 -> (y1,y2) // weaken params (WP)
+	(x1,x2) -> (y1,y2) <~~ x2 -> (y1,y2) // weaken params (WP)
 	(x1,x2) -> (y1,y2) ~~> (x1,x2) -> y2 // weaken results (WR)
 ```
 

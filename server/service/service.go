@@ -22,7 +22,8 @@ func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) 
 		return model.SearchResp{}, fmt.Errorf("error parsing query")
 	}
 
-	result := lo.Map(ranking.DefaultRanker.Rank(inpSig, collect.FuncDatabase),
+	ranked := ranking.DefaultRanker.Rank(inpSig, collect.FuncDatabase)
+	result := lo.Map(ranked,
 		func(sigDecl u.T2, ind int) model.ResultItem {
 			name := sigDecl.B.Name()
 			pkg := sigDecl.B.Pkg().Path()
