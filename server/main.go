@@ -32,9 +32,10 @@ func main() {
 	h.GET("/search", SearchH)
 
 	// todo elegantly initialize; OO
-	hlog.Info("Start InitFuncDatabase...")
+	hlog.Info("Start initializing FuncDatabase and ranker...")
 	collect.InitFuncDatabase()
 	ranking.DefaultRanker = ranking.NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+	hlog.Info("End initializing FuncDatabase and ranker!")
 
 	hlog.Info("Start serving...")
 	h.Spin()

@@ -33,6 +33,9 @@ func InitFuncDatabase() {
 		// depthTTL=1: |V|=4465; |E|=4187
 
 		//`strconv`,
+		//`slices`,
+		//`strings`,
+		//`maps`,
 	}
 	FuncDatabase, err = ParseFuncSigsFromPackage(pkgIDs...)
 	if err != nil {

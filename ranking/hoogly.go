@@ -1,6 +1,7 @@
 package ranking
 
 import (
+	"encoding/json"
 	"go/types"
 	"math"
 	"os"
@@ -55,9 +56,13 @@ func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
 	}
 	o, _ := r.sigGraph.Order()
 	s, _ := r.sigGraph.Size()
-	hlog.Info("graph order and size: |V|=", o, "; |E|=", s)
+	hlog.Info("Graph order and size: |V|=", o, "; |E|=", s)
 	file2, _ := os.Create("./siggraph.gv")
 	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
+
+	//hlog.Info("Before InitFloydWarshall")
+	//r.InitFloydWarshall()
+	//hlog.Info("After InitFloydWarshall")
 }
 
 func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
@@ -88,6 +93,66 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 		r.InitDFS(mut, depthTTL-1)
 		_ = addEdge(r.sigGraph, r.hash(mut), r.hash(sig), 2)
 	}
+}
+
+// InitFloydWarshall refresh distCache by applying Floyd-Warshall algorithm to sigGraph.
+func (r *HooglyRanker) InitFloydWarshall() {
+	r.distCache = make(map[lo.Tuple2[SigStr, SigStr]]int)
+
+	g := r.sigGraph
+	adj, err := g.AdjacencyMap()
+	if err != nil {
+		panic("InitFloydWarshall .AdjacencyMap(): " + err.Error())
+	}
+
+	for u, es := range adj {
+		for v, e := range es {
+			r.distCache[lo.T2(u, v)] = e.Properties.Weight
+		}
+	}
+
+	vertices, err := g.Vertices()
+	if err != nil {
+		panic("InitFloydWarshall .Vertices(): " + err.Error())
+	}
+
+	for i, k := range vertices {
+		hlog.Infof("%d/%d k=%s", i+1, len(vertices), k)
+		for _, u := range vertices {
+			for _, v := range vertices {
+				dUV, finiteUV := r.distCache[lo.T2(u, v)]
+				dUK, finiteUK := r.distCache[lo.T2(u, k)]
+				dKV, finiteKV := r.distCache[lo.T2(k, v)]
+				if finiteUK && finiteKV {
+					if !finiteUV || dUV > dUK+dKV {
+						r.distCache[lo.T2(u, v)] = dUK + dKV
+					}
+				}
+			}
+		}
+	}
+}
+
+func (r *HooglyRanker) MarshalDistCache() []byte {
+	// map map to map
+	m := make(map[SigStr]map[SigStr]int)
+	for uv, d := range r.distCache {
+		if _, ok := m[uv.A]; !ok {
+			m[uv.A] = make(map[SigStr]int)
+		}
+		m[uv.A][uv.B] = d
+	}
+
+	j, err := json.Marshal(m)
+	if err != nil {
+		panic("MarshalDistCache err=" + err.Error())
+	}
+	return j
+
+}
+
+func (r *HooglyRanker) UnmarshalDistCache(j []byte) {
+
 }
 
 // Anonymize 先写一层吧……累了。显而易见的 badcase: lo.Map 模糊搜索不到 TODO recursive
@@ -122,6 +187,14 @@ func (r *HooglyRanker) DistanceWithCache(src, tar *types.Signature) int {
 	}
 	r.distCache[key] = dist(r.sigGraph, r.hash(src), r.hash(tar))
 	return r.distCache[key]
+}
+
+func (r *HooglyRanker) DistanceWithFloydWarshall(src, tar *types.Signature) int {
+	key := lo.T2(r.hash(src), r.hash(tar))
+	if d, ok := r.distCache[key]; ok {
+		return d
+	}
+	return math.MaxInt
 }
 
 //func permuteParams(sig *types.Signature) []*types.Signature {

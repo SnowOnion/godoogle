@@ -12,6 +12,7 @@ import (
 
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/SnowOnion/godoogle/collect"
@@ -191,6 +192,58 @@ func TestNewHooglyRanker(t *testing.T) {
 
 	sie := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i, e), false)
 
+	expectedVertices := u.SliceToSet([]SigStr{
+		"func() (int, error)",
+		"func() error",
+		"func()",
+		"func() int",
+		"func(string) error",
+		"func(string)",
+		"func(string) int",
+		"func(string) (int, error)",
+	}...)
+	type v2d1 struct {
+		s SigStr
+		t SigStr
+		d int
+	}
+	expectedEdges := u.SliceToSet([]v2d1{
+		{s: `func() int`, t: `func() (int, error)`, d: 2},
+		{s: `func(string) (int, error)`, t: `func() (int, error)`, d: 3},
+		{s: `func(string) error`, t: `func() error`, d: 3},
+		{s: `func(string) error`, t: `func(string) (int, error)`, d: 2},
+		{s: `func(string)`, t: `func()`, d: 3},
+		{s: `func(string)`, t: `func(string) error`, d: 2},
+		{s: `func(string)`, t: `func(string) int`, d: 2},
+		{s: `func(string) int`, t: `func() int`, d: 3},
+		{s: `func(string) int`, t: `func(string) (int, error)`, d: 2},
+		{s: `func()`, t: `func() error`, d: 2},
+		{s: `func()`, t: `func() int`, d: 2},
+		{s: `func() error`, t: `func() (int, error)`, d: 2},
+	}...)
+
+	expectedPaths := u.SliceToSet([]v2d1{
+		{s: `func() error`, t: `func() (int, error)`, d: 2},
+		{s: `func(string) error`, t: `func(string) (int, error)`, d: 2},
+		{s: `func(string)`, t: `func(string) int`, d: 2},
+		{s: `func(string)`, t: `func() (int, error)`, d: 7},
+		{s: `func(string)`, t: `func() error`, d: 5},
+		{s: `func() int`, t: `func() (int, error)`, d: 2},
+		{s: `func(string) error`, t: `func() error`, d: 3},
+		{s: `func(string)`, t: `func(string) error`, d: 2},
+		{s: `func(string) int`, t: `func() int`, d: 3},
+		{s: `func(string)`, t: `func() int`, d: 5},
+		{s: `func(string)`, t: `func()`, d: 3},
+		{s: `func(string) (int, error)`, t: `func() (int, error)`, d: 3},
+		{s: `func()`, t: `func() error`, d: 2},
+		{s: `func()`, t: `func() int`, d: 2},
+		{s: `func(string) int`, t: `func(string) (int, error)`, d: 2},
+		{s: `func(string)`, t: `func(string) (int, error)`, d: 4},
+		{s: `func(string) int`, t: `func() (int, error)`, d: 5},
+		{s: `func(string) error`, t: `func() (int, error)`, d: 5},
+		{s: `func()`, t: `func() (int, error)`, d: 4},
+	}...)
+
 	candi := []u.T2{
 		{sie, types.NewFunc(token.NoPos, nil, "", sie)},
 	}
@@ -199,6 +252,32 @@ func TestNewHooglyRanker(t *testing.T) {
 	t.Log(r.sigGraph.Size())
 	file2, _ := os.Create("./siggraph.gv")
 	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
+
+	V, _ := r.sigGraph.Order()
+	E, _ := r.sigGraph.Size()
+	assert.Equal(t, 8, V)
+	assert.Equal(t, 12, E)
+
+	vertices, _ := r.sigGraph.Vertices()
+	assert.True(t, u.SliceToSet(vertices...).Equals(expectedVertices))
+
+	edges, _ := r.sigGraph.Edges()
+	//for _, e := range edges {
+	//	fmt.Printf("{s:`%s`,t:`%s`,d:%d},\n", e.Source, e.Target, e.Properties.Weight)
+	//}
+	edgeSet := u.SliceToSet(lo.Map(edges, func(e graph.Edge[SigStr], _ int) v2d1 {
+		return v2d1{s: e.Source, t: e.Target, d: e.Properties.Weight}
+	})...)
+	assert.True(t, edgeSet.Equals(expectedEdges))
+
+	//for uv, d := range r.distCache {
+	//	//t.Log(d, uv.A, "->", uv.B)
+	//	//fmt.Printf("{s:`%s`,t:`%s`,d:%d},\n", uv.A, uv.B, d)
+	//}
+	pathSet := u.SliceToSet(lo.MapToSlice(r.distCache, func(uv lo.Tuple2[SigStr, SigStr], d int) v2d1 {
+		return v2d1{s: uv.A, t: uv.B, d: d}
+	})...)
+	assert.True(t, pathSet.Equals(expectedPaths))
 }
 
 func BenchmarkDistance(b *testing.B) {
@@ -231,6 +310,23 @@ func BenchmarkDistanceWithCache(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		ranker.DistanceWithCache(si, sie)
+		//b.Log()
+	}
+}
+
+func BenchmarkDistanceWithFloydWarshall(b *testing.B) {
+	collect.InitFuncDatabase()
+	ranker := NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+
+	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
+	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
+	e := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("error").Type())
+
+	sie := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i, e), false)
+	si := types.NewSignatureType(nil, nil, nil, types.NewTuple(s), types.NewTuple(i), false)
+
+	for i := 0; i < b.N; i++ {
+		ranker.DistanceWithFloydWarshall(si, sie)
 		//b.Log()
 	}
 }
