@@ -23,9 +23,9 @@ func InitFuncDatabase() {
 	var err error
 	pkgIDs := []string{
 		//`golang.org/x/exp/slices`,
-		//`github.com/samber/lo`,
+		`github.com/samber/lo`,
 		`std`,
-		//`github.com/dominikbraun/graph`,
+		`github.com/dominikbraun/graph`,
 
 		//`sort`,
 		// when siggraph has no depth limit: |V|=60509; |E|=351739

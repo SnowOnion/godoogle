@@ -223,6 +223,14 @@ func TestNewHooglyRanker(t *testing.T) {
 	}...)
 
 	expectedPaths := u.SliceToSet([]v2d1{
+		{s: `func(string) error`, t: `func(string) error`, d: 0},
+		{s: `func(string)`, t: `func(string)`, d: 0},
+		{s: `func(string) int`, t: `func(string) int`, d: 0},
+		{s: `func(string) (int, error)`, t: `func(string) (int, error)`, d: 0},
+		{s: `func() (int, error)`, t: `func() (int, error)`, d: 0},
+		{s: `func() error`, t: `func() error`, d: 0},
+		{s: `func()`, t: `func()`, d: 0},
+		{s: `func() int`, t: `func() int`, d: 0},
 		{s: `func() error`, t: `func() (int, error)`, d: 2},
 		{s: `func(string) error`, t: `func(string) (int, error)`, d: 2},
 		{s: `func(string)`, t: `func(string) int`, d: 2},
@@ -260,6 +268,9 @@ func TestNewHooglyRanker(t *testing.T) {
 
 	vertices, _ := r.sigGraph.Vertices()
 	assert.True(t, u.SliceToSet(vertices...).Equals(expectedVertices))
+	//for _, v := range vertices {
+	//	fmt.Printf("{s:`%s`,t:`%s`,d:%d},\n", v, v, 0)
+	//}
 
 	edges, _ := r.sigGraph.Edges()
 	//for _, e := range edges {
@@ -270,6 +281,7 @@ func TestNewHooglyRanker(t *testing.T) {
 	})...)
 	assert.True(t, edgeSet.Equals(expectedEdges))
 
+	//r.InitFloydWarshall(16)
 	//for uv, d := range r.distCache {
 	//	//t.Log(d, uv.A, "->", uv.B)
 	//	//fmt.Printf("{s:`%s`,t:`%s`,d:%d},\n", uv.A, uv.B, d)

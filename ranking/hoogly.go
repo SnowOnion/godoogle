@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/dominikbraun/graph"
@@ -20,7 +21,7 @@ type HooglyRanker struct {
 	sigIndex  map[SigStr][]u.T2
 	hash      func(sig *types.Signature) string
 	sigGraph  graph.Graph[SigStr, *types.Signature]
-	distCache map[lo.Tuple2[SigStr, SigStr]]int
+	distCache map[lo.Tuple2[SigStr, SigStr]]int // TODO just use map[SigStr]map[SigStr]int?
 }
 
 type SigStr = string // types.Signature#String()
@@ -54,15 +55,17 @@ func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
 		// TODO 暴露配置项
 		r.InitDFS(Anonymize(t.A), 3)
 	}
+	hlog.Info("|candidates|=", len(candidates), "; |sigIndex|=", len(r.sigIndex))
 	o, _ := r.sigGraph.Order()
 	s, _ := r.sigGraph.Size()
 	hlog.Info("Graph order and size: |V|=", o, "; |E|=", s)
 	file2, _ := os.Create("./siggraph.gv")
 	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
 
-	//hlog.Info("Before InitFloydWarshall")
-	//r.InitFloydWarshall()
-	//hlog.Info("After InitFloydWarshall")
+	//r.InitFloydWarshallFromFile()
+	//hlog.Info("Before InitFloydWarshallFromFile")
+	//r.InitFloydWarshall(10)
+	//hlog.Info("After InitFloydWarshallFromFile")
 }
 
 func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
@@ -96,8 +99,9 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 }
 
 // InitFloydWarshall refresh distCache by applying Floyd-Warshall algorithm to sigGraph.
-func (r *HooglyRanker) InitFloydWarshall() {
+func (r *HooglyRanker) InitFloydWarshall(numWorkers int) {
 	r.distCache = make(map[lo.Tuple2[SigStr, SigStr]]int)
+	// It would be stupid to lock the whole distCache... Wanna use map[SigStr]map[SigStr]int now. TODO
 
 	g := r.sigGraph
 	adj, err := g.AdjacencyMap()
@@ -105,30 +109,88 @@ func (r *HooglyRanker) InitFloydWarshall() {
 		panic("InitFloydWarshall .AdjacencyMap(): " + err.Error())
 	}
 
-	for u, es := range adj {
-		for v, e := range es {
-			r.distCache[lo.T2(u, v)] = e.Properties.Weight
-		}
-	}
-
 	vertices, err := g.Vertices()
 	if err != nil {
 		panic("InitFloydWarshall .Vertices(): " + err.Error())
 	}
+	vertexIndex := make(map[SigStr]int)
+	for i, v := range vertices {
+		vertexIndex[v] = i
+	}
 
-	for i, k := range vertices {
-		hlog.Infof("%d/%d k=%s", i+1, len(vertices), k)
-		for _, u := range vertices {
-			for _, v := range vertices {
-				dUV, finiteUV := r.distCache[lo.T2(u, v)]
-				dUK, finiteUK := r.distCache[lo.T2(u, k)]
-				dKV, finiteKV := r.distCache[lo.T2(k, v)]
-				if finiteUK && finiteKV {
-					if !finiteUV || dUV > dUK+dKV {
-						r.distCache[lo.T2(u, v)] = dUK + dKV
+	const inf = math.MaxInt
+	// 空间大点大点吧，访问快 + 本算法里不用锁
+	dist := make([][]int, len(vertices))
+	for i := 0; i < len(dist); i++ {
+		dist[i] = make([]int, len(vertices))
+		for j := 0; j < len(dist[i]); j++ {
+			if i != j {
+				dist[i][j] = inf
+			}
+		}
+	}
+
+	for u, es := range adj {
+		i := vertexIndex[u]
+		for v, e := range es {
+			j := vertexIndex[v]
+			dist[i][j] = e.Properties.Weight
+		}
+	}
+
+	var wg sync.WaitGroup
+	chunks := len(vertices) / numWorkers
+	for ki, k := range vertices {
+		hlog.Infof("%d/%d k=%s", ki+1, len(vertices), k)
+		wg.Add(numWorkers)
+		for worker := 0; worker < numWorkers; worker++ {
+			go func(worker int) {
+				defer wg.Done()
+				start := worker * chunks
+				end := lo.Ternary(worker == numWorkers-1, len(vertices), start+chunks)
+
+				for i := start; i < end; i++ {
+					for j := range vertices {
+						if dIK, dKJ := dist[i][ki], dist[ki][j]; dIK != inf && dKJ != inf {
+							if dist[i][j] > dIK+dKJ {
+								dist[i][j] = dIK + dKJ
+							}
+						}
+
 					}
 				}
+			}(worker)
+		}
+		wg.Wait()
+	}
+	for i := 0; i < len(dist); i++ {
+		for j := 0; j < len(dist[0]); j++ {
+			if dist[i][j] != inf {
+				r.distCache[lo.T2(vertices[i], vertices[j])] = dist[i][j]
 			}
+		}
+	}
+}
+
+func (r *HooglyRanker) InitFloydWarshallFromFile() {
+	path := "res/floyd.json" // TODO elegant
+	if len(os.Args) >= 2 && os.Args[1] != "" {
+		path = os.Args[1]
+	}
+
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	dist := make(map[SigStr]map[SigStr]int)
+	err = json.Unmarshal(bytes, &dist)
+	if err != nil {
+		panic(err)
+	}
+
+	for u, es := range dist {
+		for v, d := range es {
+			r.distCache[lo.T2(u, v)] = d
 		}
 	}
 }
@@ -294,7 +356,7 @@ func (r HooglyRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 	//}
 
 	less := func(i, j int) bool {
-		return r.DistanceWithCache(query, result[i].A) < r.DistanceWithCache(query, result[j].A)
+		return r.DistanceWithFloydWarshall(query, result[i].A) < r.DistanceWithFloydWarshall(query, result[j].A)
 	}
 	sort.Slice(result, less)
 	return result
