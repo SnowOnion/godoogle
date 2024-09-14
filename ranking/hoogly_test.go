@@ -185,6 +185,7 @@ func TestWeakenParams(t *testing.T) {
 	assert.True(t, types.IdenticalIgnoreTags(vie, mutants[0]))
 }
 
+// Test only the preparation, not the ranking
 func TestNewHooglyRanker(t *testing.T) {
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())

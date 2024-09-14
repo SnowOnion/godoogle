@@ -22,19 +22,23 @@ type HooglyRanker struct {
 	hash      func(sig *types.Signature) string
 	sigGraph  graph.Graph[SigStr, *types.Signature]
 	distCache map[lo.Tuple2[SigStr, SigStr]]int // TODO just use map[SigStr]map[SigStr]int?
+
+	loadFromFile bool
 }
 
 type SigStr = string // types.Signature#String()
 
-func NewHooglyRanker(candidates []u.T2) HooglyRanker {
+// TODO functional options
+func NewHooglyRanker(candidates []u.T2, loadFromFile bool) HooglyRanker {
 	hash := func(sig *types.Signature) string {
 		return sig.String()
 	}
 	r := HooglyRanker{
-		sigIndex:  make(map[SigStr][]u.T2),
-		hash:      hash,
-		sigGraph:  graph.New(hash, graph.Directed(), graph.Acyclic(), graph.Weighted()),
-		distCache: make(map[lo.Tuple2[SigStr, SigStr]]int),
+		sigIndex:     make(map[SigStr][]u.T2),
+		hash:         hash,
+		sigGraph:     graph.New(hash, graph.Directed(), graph.Acyclic(), graph.Weighted()),
+		distCache:    make(map[lo.Tuple2[SigStr, SigStr]]int),
+		loadFromFile: loadFromFile,
 	}
 	r.InitCandidates(candidates)
 
@@ -53,7 +57,7 @@ func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
 		r.sigIndex[sigStr] = []u.T2{t}
 
 		// TODO 暴露配置项
-		r.InitDFS(Anonymize(t.A), 3)
+		r.InitDFS(u.Anonymize(t.A), 3)
 	}
 	hlog.Info("|candidates|=", len(candidates), "; |sigIndex|=", len(r.sigIndex))
 	o, _ := r.sigGraph.Order()
@@ -62,7 +66,10 @@ func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
 	file2, _ := os.Create("./siggraph.gv")
 	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
 
-	//r.InitFloydWarshallFromFile()
+	if r.loadFromFile {
+		r.InitFloydWarshallFromFile()
+	}
+
 	//hlog.Info("Before InitFloydWarshallFromFile")
 	//r.InitFloydWarshall(10)
 	//hlog.Info("After InitFloydWarshallFromFile")
@@ -72,7 +79,7 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 	if _, err := r.sigGraph.Vertex(r.hash(sig)); err == nil {
 		return
 	}
-	sig = Anonymize(sig) // if not Anonymize: things like `func(s string) string` go in... // TODO 提效：一棵树只需 Anonymize 一次
+	sig = u.Anonymize(sig) // if not Anonymize: things like `func(s string) string` go in... // TODO 提效：一棵树只需 Anonymize 一次
 	_ = r.sigGraph.AddVertex(sig)
 
 	if depthTTL <= 0 {
@@ -173,8 +180,17 @@ func (r *HooglyRanker) InitFloydWarshall(numWorkers int) {
 }
 
 func (r *HooglyRanker) InitFloydWarshallFromFile() {
-	path := "res/floyd.json" // TODO elegant
-	if len(os.Args) >= 2 && os.Args[1] != "" {
+	// pre-requisite: the res/ is in the working directory. Shell: cd. GoLand: Edit Configurations.
+	// TODO elegant
+	path := "res/floyd.json"
+	//path := "res/ter.json"
+
+	hlog.Info("os.Args:")
+	lo.ForEach(os.Args, func(arg string, argI int) {
+		hlog.Info(argI, arg)
+	})
+	if len(os.Args) >= 2 && os.Args[1] != "" &&
+		os.Args[1] != "-test.v" /*for unit test in Goland*/ {
 		path = os.Args[1]
 	}
 
@@ -217,27 +233,6 @@ func (r *HooglyRanker) UnmarshalDistCache(j []byte) {
 
 }
 
-// Anonymize 先写一层吧……累了。显而易见的 badcase: lo.Map 模糊搜索不到 TODO recursive
-func Anonymize(sig *types.Signature) *types.Signature {
-	return types.NewSignatureType(
-		anonymizeVar(sig.Recv()),
-		copyTparams(typeParamListToSliceOfTypeParam(sig.RecvTypeParams())),
-		copyTparams(typeParamListToSliceOfTypeParam(sig.TypeParams())),
-		types.NewTuple(lo.Map(tupleToSliceOfVar(sig.Params()), anonymizeVarI)...),
-		types.NewTuple(lo.Map(tupleToSliceOfVar(sig.Results()), anonymizeVarI)...),
-		sig.Variadic(),
-	)
-}
-func anonymizeVarI(v *types.Var, _ int) *types.Var {
-	return anonymizeVar(v)
-}
-func anonymizeVar(v *types.Var) *types.Var {
-	if v == nil {
-		return v
-	}
-	return types.NewVar(v.Pos(), nil, "", v.Type())
-}
-
 func (r *HooglyRanker) Distance(src, tar *types.Signature) int {
 	return dist(r.sigGraph, r.hash(src), r.hash(tar))
 }
@@ -268,7 +263,7 @@ func (r *HooglyRanker) DistanceWithFloydWarshall(src, tar *types.Signature) int 
 func weakenParams(sig *types.Signature) []*types.Signature {
 	rst := make([]*types.Signature, sig.Params().Len())
 	for i := 0; i < sig.Params().Len(); i++ {
-		newParamsSlice := tupleToSliceOfVarExcept(sig.Params(), i)
+		newParamsSlice := u.TupleToSliceOfVarExcept(sig.Params(), i)
 		newParams := types.NewTuple(newParamsSlice...)
 
 		newVariadic := sig.Variadic()
@@ -277,8 +272,8 @@ func weakenParams(sig *types.Signature) []*types.Signature {
 		}
 
 		rst[i] = types.NewSignatureType(sig.Recv(),
-			copyTparams(typeParamListToSliceOfTypeParam(sig.RecvTypeParams())),
-			copyTparams(typeParamListToSliceOfTypeParam(sig.TypeParams())), // if not copy -> panic: type parameter bound more than once
+			u.CopyTypeParams(u.TypeParamListToSliceOfTypeParam(sig.RecvTypeParams())),
+			u.CopyTypeParams(u.TypeParamListToSliceOfTypeParam(sig.TypeParams())), // if not copy -> panic: type parameter bound more than once
 			newParams,
 			sig.Results(),
 			newVariadic)
@@ -291,11 +286,11 @@ func weakenParams(sig *types.Signature) []*types.Signature {
 func weakenResults(sig *types.Signature) []*types.Signature {
 	rst := make([]*types.Signature, sig.Results().Len())
 	for i := 0; i < sig.Results().Len(); i++ {
-		newResultSlice := tupleToSliceOfVarExcept(sig.Results(), i)
+		newResultSlice := u.TupleToSliceOfVarExcept(sig.Results(), i)
 		newResult := types.NewTuple(newResultSlice...)
 		rst[i] = types.NewSignatureType(sig.Recv(),
-			copyTparams(typeParamListToSliceOfTypeParam(sig.RecvTypeParams())),
-			copyTparams(typeParamListToSliceOfTypeParam(sig.TypeParams())), // if not copy -> panic: type parameter bound more than once
+			u.CopyTypeParams(u.TypeParamListToSliceOfTypeParam(sig.RecvTypeParams())),
+			u.CopyTypeParams(u.TypeParamListToSliceOfTypeParam(sig.TypeParams())), // if not copy -> panic: type parameter bound more than once
 			sig.Params(),
 			newResult,
 			sig.Variadic())
@@ -339,12 +334,12 @@ func (r HooglyRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 	if query == nil {
 		panic("Rank query == nil")
 	}
-	query = Anonymize(query)
+	query = u.Anonymize(query)
 
 	result := make([]u.T2, len(candidates))
 	copy(result, candidates)
 	for i := 0; i < len(result); i++ {
-		result[i].A = Anonymize(result[i].A)
+		result[i].A = u.Anonymize(result[i].A)
 	}
 	//less := func(i, j int) bool {
 	//	return distance(query, result[i].A) < distance(query, result[j].A)
@@ -385,16 +380,8 @@ func distance(src, dst *types.Signature) int64 {
 	return 114514
 }
 
-func typeParamListToSliceOfTypeParam(inp *types.TypeParamList) []*types.TypeParam {
-	out := make([]*types.TypeParam, inp.Len())
-	for i := 0; i < inp.Len(); i++ {
-		out[i] = inp.At(i)
-	}
-	return out
-}
-
 func sortTypeParamList(inp *types.TypeParamList) []*types.TypeParam {
-	out := typeParamListToSliceOfTypeParam(inp)
+	out := u.TypeParamListToSliceOfTypeParam(inp)
 	sort.SliceStable(out, func(i, j int) bool {
 		return out[i].Obj().Name() < out[j].Obj().Name()
 	})
@@ -404,37 +391,9 @@ func sortTypeParamList(inp *types.TypeParamList) []*types.TypeParam {
 // very immutable! very purely functional
 func signatureWithNewTypeParamList(inp *types.Signature, tparams []*types.TypeParam) *types.Signature {
 	return types.NewSignatureType(inp.Recv(),
-		copyTparams(typeParamListToSliceOfTypeParam(inp.RecvTypeParams())), // TODO no copy but no panic? Oh I have not bound (rebind) them for the first time.
-		copyTparams(tparams), // if not copy -> panic: type parameter bound more than once
+		u.CopyTypeParams(u.TypeParamListToSliceOfTypeParam(inp.RecvTypeParams())), // TODO no copy but no panic? Oh I have not bound (rebind) them for the first time.
+		u.CopyTypeParams(tparams), // if not copy -> panic: type parameter bound more than once
 		inp.Params(),
 		inp.Results(),
 		inp.Variadic())
-}
-
-func copyTparams(tparams []*types.TypeParam) []*types.TypeParam {
-	cp := make([]*types.TypeParam, len(tparams))
-	for i := 0; i < len(tparams); i++ {
-		tp := tparams[i]
-		cp[i] = types.NewTypeParam(tp.Obj(), tp.Constraint())
-	}
-	return cp
-}
-
-func tupleToSliceOfVar(inp *types.Tuple) []*types.Var {
-	out := make([]*types.Var, inp.Len())
-	for i := 0; i < inp.Len(); i++ {
-		out[i] = inp.At(i)
-	}
-	return out
-}
-
-// todo see also https://pkg.go.dev/golang.org/x/exp/slices#Delete
-func tupleToSliceOfVarExcept(inp *types.Tuple, except int) []*types.Var {
-	out := make([]*types.Var, 0, inp.Len()-1)
-	for i := 0; i < inp.Len(); i++ {
-		if i != except {
-			out = append(out, inp.At(i))
-		}
-	}
-	return out
 }

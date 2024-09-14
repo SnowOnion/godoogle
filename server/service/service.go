@@ -15,7 +15,7 @@ import (
 
 func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) {
 	hlog.CtxInfof(ctx, "Search %s", req) // todo security concern
-	inpSig, err := lo.T2(collect.Dummy(req.Query)).Unpack()
+	inpSig, err := lo.T2(u.Dummy(req.Query)).Unpack()
 	if err != nil {
 		hlog.CtxErrorf(ctx, "Dummy err=%s", err)
 		// TODO on error, print request_id to user
