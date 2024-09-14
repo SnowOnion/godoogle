@@ -39,7 +39,7 @@ func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) 
 				FullName:  sigDecl.B.FullName(),
 				Pkg:       pkg,
 				URL:       url,
-				Signature: sigDecl.A.String(),
+				Signature: sigDecl.B.Signature().String(), // show signature before param anonymizing and type param renaming
 			}
 		})
 
