@@ -21,7 +21,7 @@ func main() {
 	fmt.Println("workers:", workers)
 
 	collect.InitFuncDatabase()
-	ranker := ranking.NewHooglyRanker(collect.FuncDatabase, false)
+	ranker := ranking.NewHooglyRanker(collect.FuncDatabase, ranking.LoadFromFile(false))
 	ranker.InitFloydWarshall(workers)
 
 	os.WriteFile("sigGraph.json", ranker.MarshalDistCache(), 0666)

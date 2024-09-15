@@ -20,5 +20,3 @@ func (r IdentityRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 }
 
 var DefaultRanker Ranker = HooglyRanker{}
-
-//HooglyRanker{}

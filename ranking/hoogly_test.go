@@ -256,7 +256,7 @@ func TestNewHooglyRanker(t *testing.T) {
 	candi := []u.T2{
 		{sie, types.NewFunc(token.NoPos, nil, "", sie)},
 	}
-	r := NewHooglyRanker(candi)
+	r := NewHooglyRanker(candi, LoadFromFile(false))
 	t.Log(r.sigGraph.Order())
 	t.Log(r.sigGraph.Size())
 	file2, _ := os.Create("./sigGraph.gv")
@@ -295,7 +295,7 @@ func TestNewHooglyRanker(t *testing.T) {
 
 func BenchmarkDistance(b *testing.B) {
 	collect.InitFuncDatabase()
-	ranker := NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+	ranker := NewHooglyRanker(collect.FuncDatabase, LoadFromFile(false))
 
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
@@ -312,7 +312,7 @@ func BenchmarkDistance(b *testing.B) {
 
 func BenchmarkDistanceWithCache(b *testing.B) {
 	collect.InitFuncDatabase()
-	ranker := NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+	ranker := NewHooglyRanker(collect.FuncDatabase, LoadFromFile(false))
 
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
@@ -329,7 +329,7 @@ func BenchmarkDistanceWithCache(b *testing.B) {
 
 func BenchmarkDistanceWithFloydWarshall(b *testing.B) {
 	collect.InitFuncDatabase()
-	ranker := NewHooglyRanker(collect.FuncDatabase) // = =、TODO be elegant!
+	ranker := NewHooglyRanker(collect.FuncDatabase, LoadFromFile(true))
 
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())

@@ -34,7 +34,10 @@ func main() {
 	// todo elegantly initialize; OO
 	hlog.Info("Start initializing FuncDatabase and ranker...")
 	collect.InitFuncDatabase()
-	ranking.DefaultRanker = ranking.NewHooglyRanker(collect.FuncDatabase, true) // = =、TODO be elegant!
+	ranking.DefaultRanker = ranking.NewHooglyRanker(
+		collect.FuncDatabase, // = =、TODO be elegant!
+		ranking.LoadFromFile(true),
+	)
 	hlog.Info("End initializing FuncDatabase and ranker!")
 
 	hlog.Info("Start serving...")
