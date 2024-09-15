@@ -78,10 +78,11 @@ func rebindType(typ types.Type, nameToTypeParam map[string]*types.TypeParam, deb
 	case *types.Struct: // TODO test
 		return typ, nil
 
-		//// 先不管这个 case……（后果：struct + 使用类型参数，会不正常）
+		//// 先不管这个 case……（后果：struct + 使用类型参数，会不正常 TODO）
 		//// internal/fuzz ReadCorpus
 		//// func(dir string, types []reflect.Type) ([]struct{Parent string; Path string; Data []byte; Values []any; Generation int; IsSeed bool}, error)
 		//// panic: multiple fields with the same name
+		//
 		//st := typ.(*types.Struct)
 		//fields := make([]*types.Var, st.NumFields())
 		//tags := make([]string, st.NumFields())

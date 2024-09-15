@@ -135,9 +135,9 @@ func TestTryDominikbraunGraph(t *testing.T) {
 	_ = addRevE(g2, hash(ve), hash(vv), 2)   // (WR)
 	_ = addEdge(g2, hash(sv), hash(vv), 3)   // (WP)
 
-	file2, _ := os.Create("./siggraph.gv")
+	file2, _ := os.Create("./sigGraph.gv")
 	_ = draw.DOT(g2, file2)
-	t.Log("dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox")
+	t.Log("dot -Tsvg -O sigGraph.gv && open sigGraph.gv.svg -a firefox")
 
 	// why not returning the sum(weight) together with the path? TODO
 	path, err := graph.ShortestPath(g2, hash(vv), hash(sie))
@@ -259,8 +259,8 @@ func TestNewHooglyRanker(t *testing.T) {
 	r := NewHooglyRanker(candi)
 	t.Log(r.sigGraph.Order())
 	t.Log(r.sigGraph.Size())
-	file2, _ := os.Create("./siggraph.gv")
-	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O siggraph.gv && open siggraph.gv.svg -a firefox
+	file2, _ := os.Create("./sigGraph.gv")
+	_ = draw.DOT(r.sigGraph, file2) // then: dot -Tsvg -O sigGraph.gv && open sigGraph.gv.svg -a firefox
 
 	V, _ := r.sigGraph.Order()
 	E, _ := r.sigGraph.Size()

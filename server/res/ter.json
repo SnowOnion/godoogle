@@ -1,1 +1,0 @@
-{"func[T any](bool, T, T) T": {"func[T any]() (T, bool)": 11, "func[T any]() (T, error)": 11, "func[T any]() (T, int, bool)": 13, "func[T any]() T": 9, "func[T any](T) T": 6, "func[T any](T, T) T": 3, "func[T any](bool) T": 6, "func[T any](bool, T) T": 3, "func[T any](bool, T, T) T": 0}}
