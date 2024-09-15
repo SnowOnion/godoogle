@@ -15,7 +15,7 @@ import (
 // TestSearch test whether all expected answers appear in top-10 results.
 func TestSearch(t *testing.T) {
 	collect.InitFuncDatabase()
-	ranking.DefaultRanker = ranking.NewHooglyRanker(collect.FuncDatabase, ranking.LoadFromFile(true)) // = =、TODO be elegant!
+	ranking.DefaultRanker = ranking.NewSigGraphRanker(collect.FuncDatabase, ranking.LoadFromFile(true)) // = =、TODO be elegant!
 
 	qna := map[string][]string{
 		`func(sort.Interface)`:                               {`sort.Sort`, `sort.Stable`},

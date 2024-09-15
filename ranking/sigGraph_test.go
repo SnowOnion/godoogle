@@ -186,7 +186,7 @@ func TestWeakenParams(t *testing.T) {
 }
 
 // Test only the preparation, not the ranking
-func TestNewHooglyRanker(t *testing.T) {
+func TestNewSigGraphRanker(t *testing.T) {
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
 	e := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("error").Type())
@@ -256,7 +256,7 @@ func TestNewHooglyRanker(t *testing.T) {
 	candi := []u.T2{
 		{sie, types.NewFunc(token.NoPos, nil, "", sie)},
 	}
-	r := NewHooglyRanker(candi, LoadFromFile(false))
+	r := NewSigGraphRanker(candi, LoadFromFile(false))
 	t.Log(r.sigGraph.Order())
 	t.Log(r.sigGraph.Size())
 	file2, _ := os.Create("./sigGraph.gv")
@@ -295,7 +295,7 @@ func TestNewHooglyRanker(t *testing.T) {
 
 func BenchmarkDistance(b *testing.B) {
 	collect.InitFuncDatabase()
-	ranker := NewHooglyRanker(collect.FuncDatabase, LoadFromFile(false))
+	ranker := NewSigGraphRanker(collect.FuncDatabase, LoadFromFile(false))
 
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
@@ -312,7 +312,7 @@ func BenchmarkDistance(b *testing.B) {
 
 func BenchmarkDistanceWithCache(b *testing.B) {
 	collect.InitFuncDatabase()
-	ranker := NewHooglyRanker(collect.FuncDatabase, LoadFromFile(false))
+	ranker := NewSigGraphRanker(collect.FuncDatabase, LoadFromFile(false))
 
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())
@@ -329,7 +329,7 @@ func BenchmarkDistanceWithCache(b *testing.B) {
 
 func BenchmarkDistanceWithFloydWarshall(b *testing.B) {
 	collect.InitFuncDatabase()
-	ranker := NewHooglyRanker(collect.FuncDatabase, LoadFromFile(true))
+	ranker := NewSigGraphRanker(collect.FuncDatabase, LoadFromFile(true))
 
 	s := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("string").Type())
 	i := types.NewVar(token.NoPos, nil, "", types.Universe.Lookup("int").Type())

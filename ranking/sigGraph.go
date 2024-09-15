@@ -18,7 +18,7 @@ import (
 	"github.com/SnowOnion/godoogle/u"
 )
 
-type HooglyRanker struct {
+type SigGraphRanker struct {
 	sigIndex  map[SigStr][]u.T2
 	hash      func(sig *types.Signature) string
 	sigGraph  graph.Graph[SigStr, *types.Signature]
@@ -29,11 +29,11 @@ type HooglyRanker struct {
 
 type SigStr = string // types.Signature#String()
 
-func NewHooglyRanker(candidates []u.T2, options ...func(*HooglyRanker)) HooglyRanker {
+func NewSigGraphRanker(candidates []u.T2, options ...func(*SigGraphRanker)) SigGraphRanker {
 	hash := func(sig *types.Signature) string {
 		return sig.String()
 	}
-	r := HooglyRanker{
+	r := SigGraphRanker{
 		sigIndex:     make(map[SigStr][]u.T2),
 		hash:         hash,
 		sigGraph:     graph.New(hash, graph.Directed(), graph.Acyclic(), graph.Weighted()),
@@ -48,13 +48,13 @@ func NewHooglyRanker(candidates []u.T2, options ...func(*HooglyRanker)) HooglyRa
 	return r
 }
 
-func LoadFromFile(b bool) func(*HooglyRanker) {
-	return func(r *HooglyRanker) {
+func LoadFromFile(b bool) func(*SigGraphRanker) {
+	return func(r *SigGraphRanker) {
 		r.loadFromFile = b
 	}
 }
 
-func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
+func (r *SigGraphRanker) InitCandidates(candidates []u.T2) {
 	for _, t := range candidates {
 		//hlog.Debug(i, " ", t.String())
 		sigStr := t.A.String() // todo anonymize?
@@ -84,7 +84,7 @@ func (r *HooglyRanker) InitCandidates(candidates []u.T2) {
 	}
 }
 
-func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
+func (r *SigGraphRanker) InitDFS(sig *types.Signature, depthTTL int) {
 	if _, err := r.sigGraph.Vertex(r.hash(sig)); err == nil {
 		return
 	}
@@ -115,7 +115,7 @@ func (r *HooglyRanker) InitDFS(sig *types.Signature, depthTTL int) {
 }
 
 // InitFloydWarshall refresh distCache by applying Floyd-Warshall algorithm to sigGraph.
-func (r *HooglyRanker) InitFloydWarshall(numWorkers int) {
+func (r *SigGraphRanker) InitFloydWarshall(numWorkers int) {
 	r.distCache = make(map[lo.Tuple2[SigStr, SigStr]]int)
 	// It would be stupid to lock the whole distCache... Wanna use map[SigStr]map[SigStr]int now. TODO
 
@@ -188,7 +188,7 @@ func (r *HooglyRanker) InitFloydWarshall(numWorkers int) {
 	}
 }
 
-func (r *HooglyRanker) InitFloydWarshallFromFile() {
+func (r *SigGraphRanker) InitFloydWarshallFromFile() {
 	// pre-requisite: the res/ is in the working directory. Shell: cd. GoLand: Edit Configurations.
 	// SEO: panic: open res/sigGraph.json: no such file or directory
 	// TODO elegant
@@ -220,7 +220,7 @@ func (r *HooglyRanker) InitFloydWarshallFromFile() {
 	}
 }
 
-func (r *HooglyRanker) MarshalDistCache() []byte {
+func (r *SigGraphRanker) MarshalDistCache() []byte {
 	// map map to map
 	m := make(map[SigStr]map[SigStr]int)
 	for uv, d := range r.distCache {
@@ -238,15 +238,15 @@ func (r *HooglyRanker) MarshalDistCache() []byte {
 
 }
 
-func (r *HooglyRanker) UnmarshalDistCache(j []byte) {
+func (r *SigGraphRanker) UnmarshalDistCache(j []byte) {
 
 }
 
-func (r *HooglyRanker) Distance(src, tar *types.Signature) int {
+func (r *SigGraphRanker) Distance(src, tar *types.Signature) int {
 	return dist(r.sigGraph, r.hash(src), r.hash(tar))
 }
 
-func (r *HooglyRanker) DistanceWithCache(src, tar *types.Signature) int {
+func (r *SigGraphRanker) DistanceWithCache(src, tar *types.Signature) int {
 	key := lo.T2(r.hash(src), r.hash(tar))
 	if d, ok := r.distCache[key]; ok {
 		return d
@@ -255,7 +255,7 @@ func (r *HooglyRanker) DistanceWithCache(src, tar *types.Signature) int {
 	return r.distCache[key]
 }
 
-func (r *HooglyRanker) DistanceWithFloydWarshall(src, tar *types.Signature) int {
+func (r *SigGraphRanker) DistanceWithFloydWarshall(src, tar *types.Signature) int {
 	key := lo.T2(r.hash(src), r.hash(tar))
 	if d, ok := r.distCache[key]; ok {
 		return d
@@ -339,7 +339,7 @@ func dist[K comparable, T any](g graph.Graph[K, T], src, tar K) int {
 
 // Rank by distance
 // TODO remove candidates param
-func (r HooglyRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
+func (r SigGraphRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 	if query == nil {
 		panic("Rank query == nil")
 	}
