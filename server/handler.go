@@ -6,6 +6,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/hertz-contrib/requestid"
 	"github.com/samber/lo"
 
 	"github.com/SnowOnion/godoogle/server/model"
@@ -38,8 +39,9 @@ func SearchH(ctx context.Context, c *app.RequestContext) {
 		hlog.CtxErrorf(ctx, "service.Search err=%s", err)
 		c.HTML(consts.StatusInternalServerError, "search.html",
 			map[string]any{
-				"q":     req.Query,
-				"error": "Sorry, something is wrong with server. It’s not your fault.",
+				"q": req.Query,
+				"error": `Sorry, something is wrong with server. It’s not your fault.
+Request ID: ` + requestid.Get(c),
 			})
 		return
 	}
@@ -54,21 +56,22 @@ func SearchH(ctx context.Context, c *app.RequestContext) {
 
 func SearchJ(ctx context.Context, c *app.RequestContext) {
 	hlog.CtxInfof(ctx, "Search invoked~")
+	requestID := requestid.Get(c)
 
 	req := model.SearchReq{}
 	err := c.BindAndValidate(&req)
 	if err != nil {
-		c.JSON(consts.StatusBadRequest, model.Resp{Code: 400000, Message: "Bad Request"})
+		c.JSON(consts.StatusBadRequest, model.Resp{Code: 400000, Message: "Bad Request", RequestID: requestID})
 		return
 	}
 
 	result, err := service.Search(nil, req)
 	if err != nil {
 		hlog.CtxErrorf(ctx, "service.Search err=%s", err)
-		c.JSON(consts.StatusInternalServerError, model.Resp{Code: 500000, Message: "Server Error"})
+		c.JSON(consts.StatusInternalServerError, model.Resp{Code: 500000, Message: "Server Error", RequestID: requestID})
 		return
 	}
 
-	c.JSON(consts.StatusOK, model.Resp{Data: result})
+	c.JSON(consts.StatusOK, model.Resp{Data: result, RequestID: requestID})
 	return
 }

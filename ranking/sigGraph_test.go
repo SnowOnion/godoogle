@@ -40,7 +40,7 @@ func TestTrySortTypeParams(t *testing.T) {
 	}
 
 	for i, inp := range inps {
-		sig, err := collect.Dummy(inp)
+		sig, err := u.Dummy(inp)
 		t.Log(i, err)
 		t.Log(i, inp)
 		t.Log(i, sig)

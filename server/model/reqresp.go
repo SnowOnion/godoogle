@@ -1,9 +1,10 @@
 package model
 
 type Resp struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    any    `json:"data"`
+	Code      int    `json:"code"`
+	Message   string `json:"message"`
+	Data      any    `json:"data"`
+	RequestID string `json:"request_id"`
 }
 
 type SearchReq struct {

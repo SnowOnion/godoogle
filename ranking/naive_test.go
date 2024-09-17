@@ -2,7 +2,6 @@ package ranking
 
 import (
 	"fmt"
-	"go/types"
 	"testing"
 
 	"github.com/samber/lo"
@@ -10,10 +9,6 @@ import (
 	"github.com/SnowOnion/godoogle/collect"
 	"github.com/SnowOnion/godoogle/u"
 )
-
-type a func(int, int) int
-type b func(int, int) bool
-type c[T comparable] func(T, T) bool
 
 func TestNaive1(t *testing.T) {
 	src := `
@@ -54,7 +49,7 @@ func Eq[T comparable](a, b T) bool {
 	for _, inp := range inps {
 		//fmt.Println(types.IdenticalIgnoreTags(q.A, q.A), q)
 		fmt.Println()
-		fmt.Println(ranker.Rank(lo.T2(collect.Dummy(inp)).A, sigs))
+		fmt.Println(ranker.Rank(lo.T2(u.Dummy(inp)).A, sigs))
 
 	}
 	//fmt.Println(lo.Map(ranker.Rank(sigs[0].A, sigs), fst))
@@ -99,7 +94,7 @@ func TestNaive2(t *testing.T) {
 	//}
 
 	for _, inOut := range suite {
-		inpSig := lo.T2(collect.Dummy(inOut.A)).A
+		inpSig := lo.T2(u.Dummy(inOut.A)).A
 		//fmt.Println(types.IdenticalIgnoreTags(q.A, q.A), q)
 		fmt.Println("~~~Search result of", inpSig)
 		//fmt.Println(ranker.Rank(inpSig, sigs))
@@ -125,6 +120,3 @@ func TestNaive2(t *testing.T) {
 	//fmt.Println(lo.Map(ranker.Rank(sigs[2].A, sigs), fst))
 
 }
-
-// func fst[A, B any](t lo.Tuple2[A, B], _ int) A { return t.A }
-func fst(t u.T2, _ int) *types.Signature { return t.A }

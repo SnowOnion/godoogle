@@ -29,11 +29,11 @@ type SigGraphRanker struct {
 
 type SigStr = string // types.Signature#String()
 
-func NewSigGraphRanker(candidates []u.T2, options ...func(*SigGraphRanker)) SigGraphRanker {
+func NewSigGraphRanker(candidates []u.T2, options ...func(*SigGraphRanker)) *SigGraphRanker {
 	hash := func(sig *types.Signature) string {
 		return sig.String()
 	}
-	r := SigGraphRanker{
+	r := &SigGraphRanker{
 		sigIndex:     make(map[SigStr][]u.T2),
 		hash:         hash,
 		sigGraph:     graph.New(hash, graph.Directed(), graph.Acyclic(), graph.Weighted()),
@@ -41,7 +41,7 @@ func NewSigGraphRanker(candidates []u.T2, options ...func(*SigGraphRanker)) SigG
 		loadFromFile: false,
 	}
 	for _, o := range options {
-		o(&r)
+		o(r)
 	}
 	r.InitCandidates(candidates)
 
@@ -339,7 +339,7 @@ func dist[K comparable, T any](g graph.Graph[K, T], src, tar K) int {
 
 // Rank by distance
 // TODO remove candidates param
-func (r SigGraphRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
+func (r *SigGraphRanker) Rank(query *types.Signature, candidates []u.T2) []u.T2 {
 	if query == nil {
 		panic("Rank query == nil")
 	}

@@ -18,7 +18,6 @@ func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) 
 	inpSig, err := lo.T2(u.Dummy(req.Query)).Unpack()
 	if err != nil {
 		hlog.CtxErrorf(ctx, "Dummy err=%s", err)
-		// TODO on error, print request_id to user
 		return model.SearchResp{}, fmt.Errorf("error parsing query")
 	}
 
