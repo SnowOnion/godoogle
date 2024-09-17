@@ -13,12 +13,11 @@ https://godoogle.sonion.xyz/
 ### 🏡Deploy Your Own Godoogle
 
 ```shell
-# per version
-cd script/
-go run floydWrite.go
- 
+# First run
+go run script/floydWrite.go
+mv sigGraph.json server/res/
 
-# per run
+# Each run
 cd server/
 go run .
 ```

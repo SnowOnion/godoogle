@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	bytes, err := os.ReadFile("script/floyd-std-ttl-3-worker-10.json")
+	bytes, err := os.ReadFile("sigGraph.json")
 	if err != nil {
 		panic(err)
 	}

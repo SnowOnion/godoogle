@@ -24,5 +24,7 @@ func main() {
 	ranker := ranking.NewSigGraphRanker(collect.FuncDatabase, ranking.LoadFromFile(false))
 	ranker.InitFloydWarshall(workers)
 
-	os.WriteFile("sigGraph.json", ranker.MarshalDistCache(), 0666)
+	if err := os.WriteFile("sigGraph.json", ranker.MarshalDistCache(), 0666); err != nil {
+		panic(err)
+	}
 }
