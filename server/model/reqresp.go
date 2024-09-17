@@ -1,9 +1,10 @@
 package model
 
 type Resp struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    any    `json:"data"`
+	Code      int    `json:"code"`
+	Message   string `json:"message"`
+	Data      any    `json:"data"`
+	RequestID string `json:"request_id"`
 }
 
 type SearchReq struct {
@@ -23,4 +24,5 @@ type ResultItem struct {
 	Pkg       string `json:"pkg"`
 	URL       string `json:"url"`
 	Signature string `json:"signature"`
+	//Distance  int    `json:"distance"` // from query to this result // u.T2 扩展性不如 struct，不太好传出来…… TODO
 }

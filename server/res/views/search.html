@@ -9,15 +9,15 @@
     <title>Godoogle</title>
 </head>
 <body>
-<!--<h1>Godoogle</h1>-->
-<h1>Welcome to <a href="/">Godoogle</a></h1>
+
+<h1><a href="/">Godoogle</a></h1>
 
 <form action="/search" method="get">
-    <input type="text" name="q" value="{{.q}}" size="64">
+    <input type="text" name="q" value="{{.q}}" size="64"
+           placeholder="Type here, or click those in Example Searches ^_^">
     <input type="submit" value="Search">
 </form>
 
-<!--<h2>Welcome to Godoogle</h2>-->
 
 {{ if .error }}
 <p>{{.error}}</p>
@@ -41,9 +41,12 @@
 
 <hr>
 <footer>
-    <p>Godoogle v0.0.3 2024-04-26 | Dev plan: smarter, wider (cover pkg.go.dev? & private deploy), faster.</p>
-    <p>Godoogle means “<a href="https://hoogle.haskell.org/" target="_blank">Hoogle</a> for Go”.</p>
-    <p>⭐️Repo: <a href="https://github.com/SnowOnion/godoogle">https://github.com/SnowOnion/godoogle</a> </p>
+    <p>Godoogle v0.0.4 2024-09-14 | Dev plan: smarter, wider (cover pkg.go.dev? & private deploy), faster.</p>
+    <p>Wanna kindly give me a shining star⭐️?^_^ <a href="https://github.com/SnowOnion/godoogle">https://github.com/SnowOnion/godoogle</a>
+    </p>
+    <p>Godoogle means “<a href="https://hoogle.haskell.org/" target="_blank">Hoogle</a> for Go”, whilst Hoogle means
+        “Google for <a
+                href="https://www.haskell.org/" target="_blank">Haskell</a>”.</p>
 </footer>
 
 </body>

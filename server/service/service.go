@@ -3,23 +3,26 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/SnowOnion/godoogle/collect"
-	"github.com/SnowOnion/godoogle/server/model"
-	"github.com/SnowOnion/godoogle/u"
+
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/samber/lo"
+
+	"github.com/SnowOnion/godoogle/collect"
+	"github.com/SnowOnion/godoogle/ranking"
+	"github.com/SnowOnion/godoogle/server/model"
+	"github.com/SnowOnion/godoogle/u"
 )
 
 func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) {
 	hlog.CtxInfof(ctx, "Search %s", req) // todo security concern
-	inpSig, err := lo.T2(collect.Dummy(req.Query)).Unpack()
+	inpSig, err := lo.T2(u.Dummy(req.Query)).Unpack()
 	if err != nil {
 		hlog.CtxErrorf(ctx, "Dummy err=%s", err)
-		// TODO on error, print request_id to user
 		return model.SearchResp{}, fmt.Errorf("error parsing query")
 	}
 
-	result := lo.Map(collect.NaiveRanker.Rank(inpSig, collect.FuncDatabase),
+	ranked := ranking.DefaultRanker.Rank(inpSig, collect.FuncDatabase)
+	result := lo.Map(ranked,
 		func(sigDecl u.T2, ind int) model.ResultItem {
 			name := sigDecl.B.Name()
 			pkg := sigDecl.B.Pkg().Path()
@@ -35,7 +38,7 @@ func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) 
 				FullName:  sigDecl.B.FullName(),
 				Pkg:       pkg,
 				URL:       url,
-				Signature: sigDecl.A.String(),
+				Signature: sigDecl.B.Signature().String(), // show signature before param anonymizing and type param renaming
 			}
 		})
 

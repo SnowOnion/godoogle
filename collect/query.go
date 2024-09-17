@@ -5,30 +5,11 @@ import (
 	"go/types"
 )
 
-// Dummy rawQuery e.g.
-// "func(rune) bool"
-// "[T, R any, K comparable] func (collection []T, iteratee func(item T, index int) R) []R"
-func Dummy(rawQuery string) (*types.Signature, error) {
-	augmentedQuery := `package dummy
-import (
-	//"golang.org/x/exp/constraints"
-	"sort"
-	"time"
-)
-type dummy ` + rawQuery
-	sigs, err := ParseGenDeclTypeSpecFuncSigs(augmentedQuery)
-	if err != nil {
-		return nil, err
-	}
-	if len(sigs) == 0 {
-		return nil, errors.New("no type signature in augmentedQuery")
-	}
-	return sigs[0], nil
-}
-
 // DummyF rawQuery e.g.
 // "func f(rune) bool"
 // " func fff[T, R any, K comparable](collection []T, f func(item T, index int) R) []R"
+//
+// Deprecated. Use Dummy.
 func DummyF(rawQuery string) (*types.Signature, error) {
 	augmentedQuery := `package dummy
 	` + rawQuery + `{return}`

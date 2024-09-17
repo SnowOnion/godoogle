@@ -1,12 +1,15 @@
 package main
 
 import (
-	"github.com/SnowOnion/godoogle/collect"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	hertzlogrus "github.com/hertz-contrib/logger/logrus"
+	"github.com/hertz-contrib/pprof"
 	"github.com/hertz-contrib/requestid"
 	"github.com/sirupsen/logrus"
+
+	"github.com/SnowOnion/godoogle/collect"
+	"github.com/SnowOnion/godoogle/ranking"
 )
 
 func main() {
@@ -20,6 +23,8 @@ func main() {
 	h := server.Default(server.WithHostPorts("[::]:8888"))
 	h.Use(requestid.New())
 
+	pprof.Register(h)
+
 	h.LoadHTMLGlob("res/views/*")
 	h.Static("/", "./res/assets")
 	h.GET("/", Home)
@@ -27,8 +32,13 @@ func main() {
 	h.GET("/search", SearchH)
 
 	// todo elegantly initialize; OO
-	hlog.Info("Start InitFuncDatabase...")
+	hlog.Info("Start initializing FuncDatabase and ranker...")
 	collect.InitFuncDatabase()
+	ranking.DefaultRanker = ranking.NewSigGraphRanker(
+		collect.FuncDatabase, // = =、TODO be elegant!
+		ranking.LoadFromFile(true),
+	)
+	hlog.Info("End initializing FuncDatabase and ranker!")
 
 	hlog.Info("Start serving...")
 	h.Spin()

@@ -13,8 +13,14 @@ https://godoogle.sonion.xyz/
 ### 🏡Deploy Your Own Godoogle
 
 ```shell
+# per version
+cd script/
+go run floydWrite.go
+ 
+
+# per run
 cd server/
-go run *.go
+go run .
 ```
 
 Then visit [localhost:8888](http://localhost:8888).
