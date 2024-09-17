@@ -8,7 +8,7 @@ func[a any](bool, a, a) a
 import json
 from pprint import pp
 
-with open("../../../godoogle_archive/floyd.json", "r") as fi:
+with open("floyd.json", "r") as fi:
     j=json.load(fi)
 ter_sig="func[T any](bool, T, T) T"
 ternary=j[ter_sig]
