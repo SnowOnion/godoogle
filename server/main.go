@@ -26,7 +26,7 @@ func main() {
 	pprof.Register(h)
 
 	h.LoadHTMLGlob("res/views/*")
-	h.Static("/", "./res/assets")
+	h.Static("/", "./res")
 	h.GET("/", Home)
 
 	h.GET("/search", SearchH)

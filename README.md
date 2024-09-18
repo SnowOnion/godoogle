@@ -38,7 +38,7 @@ WIP: Be configurable. (By now: Mutate `func InitFuncDatabase()` in [collect/cand
 
 ### Algorithm
 
-- [ ] Fuzzy search by distance
+- [x] Fuzzy search by distance
 - [ ] Learning from Hoogle...
 
 ## Challenges & Ideas

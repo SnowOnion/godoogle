@@ -5,22 +5,24 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
     <title>Godoogle</title>
 </head>
 <body>
-
-<h1><a href="/">Godoogle</a></h1>
+<header>
+    <h1><a href="/">Godoogle</a></h1>
+</header>
 
 <form action="/search" method="get">
-    <input type="text" name="q" value="{{.q}}" size="64"
-           placeholder="Type here, or click those in Example Searches ^_^">
+    <input type="text" name="q" value="{{.q}}"
+           placeholder="Type here, or click Examples ^_^">
     <input type="submit" value="Search">
 </form>
 
 
 {{ if .error }}
-<p>{{.error}}</p>
+<p class="cen">{{.error}}</p>
+<p class="cen">Request ID: {{.request_id}}</p>
 <hr>
 {{ template "welcome_example" . }}
 
@@ -40,11 +42,12 @@
 
 
 <hr>
-<footer>
-    <p>Godoogle v0.0.4 2024-09-14 | Dev plan: smarter, wider (cover pkg.go.dev? & private deploy), faster.</p>
-    <p>Wanna kindly give me a shining star⭐️?^_^ <a href="https://github.com/SnowOnion/godoogle">https://github.com/SnowOnion/godoogle</a>
+<footer class="cen">
+    <p>Godoogle v0.0.5 2024-09-17</p>
+    <p>Like Godoogle? Report bugs, request features, discuss anything? ⭐^_^⭐→ <a href="https://github.com/SnowOnion/godoogle">https://github.com/SnowOnion/godoogle</a>
     </p>
-    <p>Godoogle means “<a href="https://hoogle.haskell.org/" target="_blank">Hoogle</a> for Go”, whilst Hoogle means
+    <p>Dev plan: smarter, wider (cover pkg.go.dev? & private deploy), faster.</p>
+    <p>Godoogle means “<a href="https://hoogle.haskell.org/" target="_blank">Hoogle</a> for Go (Godoc, Golang)”, whilst Hoogle means
         “Google for <a
                 href="https://www.haskell.org/" target="_blank">Haskell</a>”.</p>
 </footer>

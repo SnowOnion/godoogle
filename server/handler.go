@@ -39,9 +39,9 @@ func SearchH(ctx context.Context, c *app.RequestContext) {
 		hlog.CtxErrorf(ctx, "service.Search err=%s", err)
 		c.HTML(consts.StatusInternalServerError, "search.html",
 			map[string]any{
-				"q": req.Query,
-				"error": `Sorry, something is wrong with server. It’s not your fault.
-Request ID: ` + requestid.Get(c),
+				"q":          req.Query,
+				"error":      `Sorry, something is wrong with the server. You may try other queries.`,
+				"request_id": requestid.Get(c),
 			})
 		return
 	}
@@ -49,8 +49,9 @@ Request ID: ` + requestid.Get(c),
 	fellingLucky := lo.TernaryF(len(resp.Result) == 0, lo.Empty[string], func() string { return resp.Result[0].FullName })
 	hlog.CtxInfof(ctx, "result len=%d [0]=%s", len(resp.Result), fellingLucky)
 	c.HTML(consts.StatusOK, "search.html", map[string]any{
-		"q":      req.Query,
-		"result": resp.Result,
+		"q":          req.Query,
+		"result":     resp.Result,
+		"request_id": requestid.Get(c),
 	})
 }
 
