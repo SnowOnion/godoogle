@@ -1,6 +1,6 @@
 # Godoogle
 
-Godoogle is a [Go](https://go.dev/) API search engine, which (by now) allows you to search by **function type signature**, including [generic](https://go.dev/doc/tutorial/generics) functions.
+Godoogle is a [Go](https://go.dev/) API search engine, which allows you to search by approximate **function type signature**, including [generics](https://go.dev/doc/tutorial/generics).
 
 Aim: Godoogle is to Go what [Hoogle](https://hoogle.haskell.org/) is to [Haskell](https://www.haskell.org/).
 
