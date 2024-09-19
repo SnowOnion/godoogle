@@ -14,7 +14,7 @@ https://godoogle.sonion.xyz/
 
 ```shell
 # First run
-go run script/floydWrite.go
+go run script/writeSigGraph.go
 mv sigGraph.json server/res/
 
 # Each run

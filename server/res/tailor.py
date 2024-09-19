@@ -1,14 +1,9 @@
 #!/usr/bin/env python3 -i
 
-"""
-func[a any](bool, a, a) a
-func[a any](bool, a, a) a
-"""
-
 import json
 from pprint import pp
 
-with open("floyd.json", "r") as fi:
+with open("sigGraph.json", "r") as fi:
     j=json.load(fi)
 ter_sig="func[T any](bool, T, T) T"
 ternary=j[ter_sig]

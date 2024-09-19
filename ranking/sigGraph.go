@@ -79,7 +79,7 @@ func (r *SigGraphRanker) InitCandidates(candidates []u.T2) {
 		r.InitFloydWarshallFromFile()
 	} else {
 		workers := max(runtime.NumCPU()-2, 1)
-		hlog.Info("workers: ", workers)
+		hlog.Info("Begin InitFloydWarshall, workers: ", workers)
 		r.InitFloydWarshall(workers) // usually too slow.
 	}
 }
