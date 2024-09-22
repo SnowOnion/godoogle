@@ -32,22 +32,32 @@ WIP: Be configurable. (By now: Mutate `func InitFuncDatabase()` in [collect/cand
 - Smarter
     - [x] Fuzzy search by distance.
     - Adapt to various inputs.
-        - [ ] Copy from code / copy from Godoogle result, e.g. `func InSlice[T comparable](item T, slice []T) bool`
+        - [x] Type params, e.g. `[T any] func(bool, T, T) T`
+        - [ ] Support non-[builtin](https://pkg.go.dev/builtin) types,
+          e.g. `func() time.Time`, `func(l sync.Locker) *sync.Cond`
+        - [ ] Copy straight from code / Godoogle result, e.g. `func InSlice[T comparable](item T, slice []T) bool`
         - [ ] No `func` nor name, e.g. `[T comparable](item T, slice []T) bool`
         - [ ] Omit type param, e.g. `func(...T) []T`, `func (T, []T) bool`
     - Imagine more.
-        - [ ] `func(X,Y)(Z,W)` -> `func(Y,X)(W,Z)`
+        - [x] `func(X,Y) (Z)` -> `func(X) (Z,W)`
+        - [ ] `func(X,Y) (Z)` <- `func(X) (Z,W)`
+        - [ ] `func(X,Y) (Z,W)` -> `func(Y,X) (W,Z)`
         - [ ] `[T comparable]func(...T) []T` -> `[T any]func(...T) []T`
         - [ ] `[E comparable](s []E, v E)` -> `[S ~[]E, E comparable](s S, v E)`
+        - [ ] `func(X)` <-> `func(*X)`
+    - First things first.
+        - [ ] 
+          Query `func(string) int` ⊢ `func(s string) (int, error)` > `func(s string) (p vendor/golang.org/x/text/unicode/bidi.Properties, sz int)`
     - [ ] Learn from Hoogle, [Roogle](https://roogle.hkmatsumoto.com/), *oogle.
 - Wider
     - [x] [Standard library](https://pkg.go.dev/std) and a few 3rd party libs.
     - [ ] Support methods.
-    - [ ] Text-based search candidates, rather than “import-based”.
+    - [ ] **Text-based search candidates, rather than “import-based”.**
+    - [ ] Show https://pkg.go.dev/builtin#max (treated as not exported now).
     - [ ] Cover https://pkg.go.dev (Not the functionality, just the range).
     - [ ] Customize search candidates, for self-hosted user.
 - Faster
-    - Memoization of shortest paths in SigGraph, the graph with func signature as vertex and distance as edge weight).
+    - Memoization of shortest paths in SigGraph, the graph with func signature as vertex and distance as edge weight.
         - [x] Text.
         - [ ] DB (RDB? Graph DB?).
 - Other
