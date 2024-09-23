@@ -5,6 +5,9 @@ sigGraph.gv.svg
 ######## JetBrains IDE
 .idea/
 
+######## Mac
+.DS_Store
+
 ######## GitHub generated for Go (2024-02-22)
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
