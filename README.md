@@ -38,6 +38,7 @@ WIP: Be configurable. (By now: Mutate `func InitFuncDatabase()` in [collect/cand
         - [ ] Copy straight from code / Godoogle result, e.g. `func InSlice[T comparable](item T, slice []T) bool`
         - [ ] No `func` nor name, e.g. `[T comparable](item T, slice []T) bool`
         - [ ] Omit type param, e.g. `func(...T) []T`, `func (T, []T) bool`
+        - [ ] Package name with{,out} import path, e.g. `func(string) (*url.URL)` <-> `func(string) (*net/url.URL)`
     - Imagine more.
         - [x] `func(X,Y) (Z)` -> `func(X) (Z,W)`
         - [ ] `func(X,Y) (Z)` <- `func(X) (Z,W)`

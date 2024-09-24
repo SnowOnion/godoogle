@@ -49,7 +49,7 @@ func Eq[T comparable](a, b T) bool {
 	for _, inp := range inps {
 		//fmt.Println(types.IdenticalIgnoreTags(q.A, q.A), q)
 		fmt.Println()
-		fmt.Println(ranker.Rank(lo.T2(u.Dummy(inp)).A, sigs))
+		fmt.Println(ranker.Rank(lo.T2(u.Dummy1(inp)).A, sigs))
 
 	}
 	//fmt.Println(lo.Map(ranker.Rank(sigs[0].A, sigs), fst))
@@ -94,7 +94,7 @@ func TestNaive2(t *testing.T) {
 	//}
 
 	for _, inOut := range suite {
-		inpSig := lo.T2(u.Dummy(inOut.A)).A
+		inpSig := lo.T2(u.Dummy1(inOut.A)).A
 		//fmt.Println(types.IdenticalIgnoreTags(q.A, q.A), q)
 		fmt.Println("~~~Search result of", inpSig)
 		//fmt.Println(ranker.Rank(inpSig, sigs))

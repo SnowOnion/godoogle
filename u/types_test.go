@@ -9,8 +9,8 @@ import (
 )
 
 func TestAnonymize(t *testing.T) {
-	////Dummy contains Anonymize
-	//sig, err := Dummy(`[a,b any, c comparable, d any] func(bool, a, a) (y a)`)
+	////Dummy1 contains Anonymize
+	//sig, err := Dummy1(`[a,b any, c comparable, d any] func(bool, a, a) (y a)`)
 	//if err != nil {
 	//	t.Error(err)
 	//}

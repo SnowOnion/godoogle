@@ -16,9 +16,9 @@ import (
 
 func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) {
 	hlog.CtxInfof(ctx, "Search %s", req.Query)
-	inpSig, err := u.Dummy(req.Query)
+	inpSig, err := u.Dummy1(req.Query)
 	if err != nil {
-		hlog.CtxErrorf(ctx, "Dummy err=%s", err)
+		hlog.CtxErrorf(ctx, "Dummy1 err=%s", err)
 		var err2 error
 		inpSig, err2 = u.Dummy2(req.Query)
 		if err2 != nil {

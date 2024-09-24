@@ -139,13 +139,13 @@ func TestDummy(t *testing.T) {
 	for inp, out := range suite {
 		if !slices.Contains([]string{
 			"[T cmp.Ordered, a,b any]func(x T, y abc.Def, z *T, ts [2]T, args ...struct{k string;  v T}) (bool, error)",
-			//"[T cmp.Ordered]func(x T, y T) bool",
+			"[T cmp.Ordered]func(x T, y T) bool",
 		}, inp) {
 			continue
 		}
 
 		i++
-		sig, err := Dummy(inp)
+		sig, err := Dummy1(inp)
 		t.Log(i, err)
 		t.Log(i, inp)
 		t.Log(i, sig)

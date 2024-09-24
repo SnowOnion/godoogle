@@ -10,16 +10,26 @@ import (
 	"go/types"
 )
 
-// Dummy rawQuery e.g.
+// Dummy1 rawQuery e.g.
 // "func(rune) bool"
 // "[T, R any, K comparable] func (collection []T, iteratee func(item T, index int) R) []R"
-func Dummy(rawQuery string) (*types.Signature, error) {
+func Dummy1(rawQuery string) (*types.Signature, error) {
 	augmentedQuery := `package dummy
 import (
 	//"golang.org/x/exp/constraints"
 	"sort"
 	"time"
 	"cmp"
+	"sync"
+	"sync/atomic"
+	"io"
+	"net"
+	"net/http"
+	"net/url"
+	"os"
+	"testing"
+	"unicode"
+	"unsafe"
 )
 type dummy ` + rawQuery
 	sigs, err := ParseGenDeclTypeSpecFuncSigs(augmentedQuery)
