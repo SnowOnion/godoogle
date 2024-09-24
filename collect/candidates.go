@@ -22,20 +22,39 @@ var (
 func InitFuncDatabase() {
 	var err error
 	pkgIDs := []string{
-		//`golang.org/x/exp/slices`,
-		`github.com/samber/lo`,
-		`std`,
-		`github.com/dominikbraun/graph`,
+		"std",
 
-		//`sort`,
+		//// Copy to dummy.go
+		//// Some has few functions but lots of methods.
+
+		// basic data types & data structures
+		"github.com/samber/lo",
+		"github.com/samber/mo",
+		"github.com/thoas/go-funk",
+		"github.com/dominikbraun/graph",
+		// Date and Time
+		"github.com/jinzhu/now",
+		// concurrent & parallel
+		"github.com/sourcegraph/conc",
+		// HTTP
+		"github.com/go-resty/resty/v2",
+		// ORM
+		"gorm.io/gorm",
+		"xorm.io/xorm",
+		// Testing
+		"github.com/stretchr/testify/assert",
+
+		//"sort",
 		// when siggraph has no depth limit: |V|=60509; |E|=351739
 		// depthTTL=2: |V|=7950; |E|=13607
 		// depthTTL=1: |V|=4465; |E|=4187
 
-		//`strconv`,
-		//`slices`,
-		//`strings`,
-		//`maps`,
+		//"strconv",
+		//"slices",
+		//"strings",
+		//"maps",
+
+		//`golang.org/x/exp/slices`,
 	}
 	FuncDatabase, err = ParseFuncSigsFromPackage(pkgIDs...)
 	if err != nil {
