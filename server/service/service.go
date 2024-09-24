@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -14,12 +15,18 @@ import (
 )
 
 func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) {
-	hlog.CtxInfof(ctx, "Search %s", req) // todo security concern
-	inpSig, err := lo.T2(u.Dummy(req.Query)).Unpack()
+	hlog.CtxInfof(ctx, "Search %s", req.Query)
+	inpSig, err := u.Dummy(req.Query)
 	if err != nil {
 		hlog.CtxErrorf(ctx, "Dummy err=%s", err)
-		return model.SearchResp{}, fmt.Errorf("error parsing query")
+		var err2 error
+		inpSig, err2 = u.Dummy2(req.Query)
+		if err2 != nil {
+			hlog.CtxErrorf(ctx, "Dummy2 err=%s", err2)
+			return model.SearchResp{}, fmt.Errorf("error parsing query: %w", errors.Join(err, err2))
+		}
 	}
+	hlog.CtxInfof(ctx, "DummyQ %s", inpSig.String())
 
 	ranked := ranking.DefaultRanker.Rank(inpSig, collect.FuncDatabase)
 	result := lo.Map(ranked,
@@ -44,5 +51,5 @@ func Search(ctx context.Context, req model.SearchReq) (model.SearchResp, error) 
 
 	return model.SearchResp{
 		Result: result,
-	}, err
+	}, nil
 }

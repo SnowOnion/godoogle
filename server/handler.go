@@ -43,6 +43,7 @@ func SearchH(ctx context.Context, c *app.RequestContext) {
 				"error":      `Sorry, something is wrong with the server. You may try other queries.`,
 				"request_id": requestid.Get(c),
 			})
+		c.Header("x-godoogle-error", err.Error())
 		return
 	}
 
@@ -66,7 +67,7 @@ func SearchJ(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	result, err := service.Search(nil, req)
+	result, err := service.Search(ctx, req)
 	if err != nil {
 		hlog.CtxErrorf(ctx, "service.Search err=%s", err)
 		c.JSON(consts.StatusInternalServerError, model.Resp{Code: 500000, Message: "Server Error", RequestID: requestID})

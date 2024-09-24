@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -199,7 +200,7 @@ func (r *SigGraphRanker) InitFloydWarshallFromFile() {
 		hlog.Info(argI, arg)
 	})
 	if len(os.Args) >= 2 && os.Args[1] != "" &&
-		os.Args[1] != "-test.v" /*for unit test in Goland*/ {
+		!strings.HasPrefix(os.Args[1], "-test") /*for unit test in Goland*/ {
 		path = os.Args[1]
 	}
 

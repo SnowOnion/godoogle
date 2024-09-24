@@ -42,6 +42,7 @@ WIP: Be configurable. (By now: Mutate `func InitFuncDatabase()` in [collect/cand
         - [x] `func(X,Y) (Z)` -> `func(X) (Z,W)`
         - [ ] `func(X,Y) (Z)` <- `func(X) (Z,W)`
         - [ ] `func(X,Y) (Z,W)` -> `func(Y,X) (W,Z)`
+        - [ ] `[T any, F comparable]` <-> `[F comparable, T any]`
         - [ ] `[T comparable]func(...T) []T` -> `[T any]func(...T) []T`
         - [ ] `[E comparable](s []E, v E)` -> `[S ~[]E, E comparable](s S, v E)`
         - [ ] `func(X)` <-> `func(*X)`

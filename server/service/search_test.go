@@ -18,6 +18,8 @@ func TestSearch(t *testing.T) {
 	ranking.DefaultRanker = ranking.NewSigGraphRanker(collect.FuncDatabase, ranking.LoadFromFile(true)) // = =、TODO be elegant!
 
 	qna := map[string][]string{
+		`func(l sync.Locker) *sync.Cond`:                     {`sync.NewCond`},
+		`func() time.Time`:                                   {`time.Now`},
 		`func(sort.Interface)`:                               {`sort.Sort`, `sort.Stable`},
 		`func(n int, cmp func(int) int) (i int, found bool)`: {`sort.Find`},
 		`[T any] func(bool, T, T) T`:                         {`github.com/samber/lo.Ternary`},
