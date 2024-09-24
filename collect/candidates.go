@@ -24,7 +24,7 @@ func InitFuncDatabase() {
 	pkgIDs := []string{
 		"std",
 
-		//// Copy to dummy.go
+		//// Copy to imports.go
 		//// Some has few functions but lots of methods.
 
 		// basic data types & data structures

@@ -30,6 +30,9 @@ import (
 	"testing"
 	"unicode"
 	"unsafe"
+	"reflect"
+	"go/ast"
+	"go/types"
 )
 type dummy ` + rawQuery
 	sigs, err := ParseGenDeclTypeSpecFuncSigs(augmentedQuery)
