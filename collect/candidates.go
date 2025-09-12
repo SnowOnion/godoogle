@@ -28,10 +28,28 @@ func InitFuncDatabase() {
 		//// Some has few functions but lots of methods.
 
 		// basic data types & data structures
+		"github.com/bytedance/gg/collection",
+		"github.com/bytedance/gg/collection/list",
+		"github.com/bytedance/gg/collection/set",
+		"github.com/bytedance/gg/collection/skipmap",
+		"github.com/bytedance/gg/collection/skipset",
+		"github.com/bytedance/gg/collection/tuple",
+		"github.com/bytedance/gg/gcond",
+		"github.com/bytedance/gg/gconv",
+		"github.com/bytedance/gg/gfunc",
+		"github.com/bytedance/gg/gmap",
+		"github.com/bytedance/gg/goption",
+		"github.com/bytedance/gg/gptr",
+		"github.com/bytedance/gg/gresult",
+		"github.com/bytedance/gg/gslice",
+		"github.com/bytedance/gg/gson",
+		"github.com/bytedance/gg/gstd/gsync",
+		"github.com/bytedance/gg/gvalue",
+		"github.com/dominikbraun/graph",
+		"github.com/dominikbraun/graph",
 		"github.com/samber/lo",
 		"github.com/samber/mo",
 		"github.com/thoas/go-funk",
-		"github.com/dominikbraun/graph",
 		// Date and Time
 		"github.com/jinzhu/now",
 		// concurrent & parallel
